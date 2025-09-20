@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Карта - Аналітична панель</title>
-      <link rel="icon" type="image/png" href="./ico.png">
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link href="https://cdn.jsdelivr.net/npm/vanilla-calendar-pro@2.9.6/build/vanilla-calendar.min.css" rel="stylesheet">
@@ -47,7 +47,6 @@
         #action-buttons { display: flex; gap: 15px; }
         .action-button { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-color); padding: 5px; position: relative; }
         
-        /* 🎨 Стили для маячка */
         #sync-badge {
             position: absolute;
             top: 0;
@@ -63,7 +62,7 @@
             justify-content: center;
             align-items: center;
             transform: translate(40%, -40%);
-            display: none; /* Скрыт по умолчанию */
+            display: none; 
         }
         
         #events-list { list-style: none; padding: 0; margin: 0; }
@@ -111,7 +110,7 @@
         <div class="panel-header" id="panel-header-toggle">
             <h2>Аналітична панель</h2>
             <div id="action-buttons">
-                 <button id="sync-button" class="action-button" title="Синхронізувати з Google Sheet">
+                <button id="sync-button" class="action-button" title="Синхронізувати з Google Sheet">
                     <i class="fa-solid fa-sync"></i>
                     <span id="sync-badge"></span>
                 </button>
@@ -146,7 +145,6 @@
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
     <script>
-        // --- 🎨 ВАЖНО: Вставьте сюда URL вашего скрипта! ---
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwWLzQoJq0hfHer7Vsdk2xJe_Z7aNA4SRhiU0NWkMPv3IZAdcMFkyH-GrkXm6WK5SEZ/exec'; 
 
         // --- Инициализация карты ---
@@ -164,6 +162,7 @@
         let customPointsLayer = L.layerGroup().addTo(map);
         let overlayMap = null; 
         let overlayLayersGroup = L.layerGroup();
+        let lastSyncRowCount = 0; 
 
         // --- Получение ссылок на DOM ---
         const loader = document.getElementById('loader-overlay');
@@ -214,7 +213,9 @@
             overlayLayersGroup.clearLayers();
             let filteredLogs = allLogsData.filter(log => !selectedCalendarDate || log.timestamp.startsWith(selectedCalendarDate));
             filteredLogs.forEach(log => { if (log.azimuth && log.distance) { drawObservation(log, overlayLayersGroup, true); } });
-            if (intersectionClusterGroup) { intersectionClusterGroup.getLayers().forEach(marker => { L.marker(marker.getLatLng(), { icon: marker.options.icon }).bindPopup(marker.getPopup().getContent()).addTo(overlayLayersGroup); }); }
+            if (intersectionClusterGroup) {
+                intersectionClusterGroup.getLayers().forEach(marker => { L.marker(marker.getLatLng(), { icon: marker.options.icon }).bindPopup(marker.getPopup().getContent()).addTo(overlayLayersGroup); });
+            }
             customPointsLayer.getLayers().forEach(marker => {
                 const newMarker = L.marker(marker.getLatLng(), { icon: marker.options.icon }).addTo(overlayLayersGroup);
                 if (marker.customName) { newMarker.bindPopup(getPopupContent({_leaflet_id: 'clone', customName: marker.customName, getLatLng: marker.getLatLng})); }
@@ -248,65 +249,60 @@
             }
         });
 
-        // --- 🎨 НОВАЯ ЛОГИКА: Работа с Google Sheets ---
-        document.getElementById('sync-button').addEventListener('click', fetchDataFromSheet);
+        // --- Работа с Google Sheets ---
+        document.getElementById('sync-button').addEventListener('click', () => fetchDataFromSheet(false)); // false = не тихий режим
 
-        async function fetchDataFromSheet() {
+        async function fetchDataFromSheet(isSilent = false) {
             if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
-                alert('Помилка: URL Google Apps Script не вказано в коді.');
+                if (!isSilent) alert('Помилка: URL Google Apps Script не вказано в коді.');
                 return;
             }
-            loader.style.display = 'flex';
+            if (!isSilent) loader.style.display = 'flex';
+            
             try {
                 const response = await fetch(GOOGLE_SCRIPT_URL);
+                if (!response.ok) throw new Error('Network response was not ok');
                 const sheetData = await response.json();
                 
-                // Обработка данных из таблицы
-                const lastSyncTimestamp = localStorage.getItem('lastSyncTimestamp') || 0;
-                let newEventsCount = 0;
-                
-                const formattedData = sheetData.map((row, index) => {
-                    if (new Date(row.Timestamp).getTime() > lastSyncTimestamp) {
-                        newEventsCount++;
+                if (isSilent) {
+                    const newRowCount = sheetData.length;
+                    const newEventsCount = newRowCount - lastSyncRowCount;
+                    const syncBadge = document.getElementById('sync-badge');
+                    if (newEventsCount > 0) {
+                        syncBadge.textContent = newEventsCount;
+                        syncBadge.style.display = 'flex';
+                    } else {
+                        syncBadge.style.display = 'none';
                     }
+                    return;
+                }
+
+                lastSyncRowCount = sheetData.length;
+                document.getElementById('sync-badge').style.display = 'none';
+
+                const formattedData = sheetData.map((row, index) => {
                     return {
-                        name: row.Event,
-                        timestamp: row.Timestamp,
-                        azimuth: row.Azimuth,
+                        name: row.Event, timestamp: row.Timestamp, azimuth: row.Azimuth,
                         distance: row.Distance ? parseInt(row.Distance, 10) : null,
-                        comment: row.Comment,
-                        uniqueId: row.UniqueID || `sheet_${index}`,
+                        comment: row.Comment, uniqueId: row.UniqueID || `sheet_${index}`,
                         originCoordinates: { lat: parseFloat(row.Latitude), lon: parseFloat(row.Longitude) },
                         fileName: `Sheet: ${row.Shift} | ${row.Position}`,
-                        fileColor: generateHslColor(index, sheetData.length) // Можно сделать умнее, но для начала сойдет
+                        fileColor: generateHslColor(index, sheetData.length)
                     };
                 });
                 
                 allLogsData = formattedData;
-                
-                initCalendar();
-                updateMap();
-                displayEventsList(allLogsData, null);
-                
-                // Обновляем маячок и время последней синхронизации
-                const syncBadge = document.getElementById('sync-badge');
-                if (newEventsCount > 0) {
-                    syncBadge.textContent = newEventsCount;
-                    syncBadge.style.display = 'flex';
-                } else {
-                    syncBadge.style.display = 'none';
-                }
-                localStorage.setItem('lastSyncTimestamp', new Date().getTime());
+                initCalendar(); updateMap(); displayEventsList(allLogsData, null);
                 
             } catch (error) {
-                alert('Не вдалося завантажити дані з Google Sheet.');
+                if (!isSilent) alert('Не вдалося завантажити дані з Google Sheet.');
                 console.error('Fetch error:', error);
             } finally {
-                loader.style.display = 'none';
+                if (!isSilent) loader.style.display = 'none';
             }
         }
         
-        // --- Загрузка и обработка файлов (остается для локальной работы) ---
+        // --- Загрузка и обработка файлов ---
         function handleFileSelect(event) {
             loader.style.display = 'flex';
             if (mapLayersControl) { map.removeControl(mapLayersControl); mapLayersControl = null; }
@@ -462,14 +458,12 @@
         function findIntersection(logA, logB) { const azA = (parseAzimuth(logA.azimuth)[0] + parseAzimuth(logA.azimuth)[1]) / 2; const azB = (parseAzimuth(logB.azimuth)[0] + parseAzimuth(logB.azimuth)[1]) / 2; const p1 = logA.originCoordinates, p3 = logB.originCoordinates; const p2 = getDestPoint(p1.lat, p1.lon, azA, 10000), p4 = getDestPoint(p3.lat, p3.lon, azB, 10000); const x1 = p1.lon, y1 = p1.lat, x2 = p2[1], y2 = p2[0], x3 = p3.lon, y3 = p3.lat, x4 = p4[1], y4 = p4[0]; const den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4); if (den === 0) return null; const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den; const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den; if (t > 0 && u > 0) return [y1 + t * (y2 - y1), x1 + t * (x2 - x1)]; return null; }
         function calculateDistance(lat1, lon1, lat2, lon2) { const R = 6371e3; const p1 = lat1 * Math.PI / 180, p2 = lat2 * Math.PI / 180; const dP = (lat2 - lat1) * Math.PI / 180; const dL = (lon2 - lon1) * Math.PI / 180; const a = Math.sin(dP / 2) * Math.sin(dP / 2) + Math.cos(p1) * Math.cos(p2) * Math.sin(dL / 2) * Math.sin(dL / 2); const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); return R * c; }
 
-        // Запускаем первую синхронизацию при загрузке страницы
-        window.addEventListener('load', fetchDataFromSheet);
+        // --- Запуск фоновой проверки ---
+        window.addEventListener('load', () => {
+            fetchDataFromSheet();
+            setInterval(() => fetchDataFromSheet(true), 30000);
+        });
 
     </script>
 </body>
 </html>
-
-
-
-
-
