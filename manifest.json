@@ -3,7 +3,7 @@
   "short_name": "Карта",
   "description": "Аналітична панель.",
   "start_url": ".",
-  "display": "fullscreen",
+ "display": "standalone",
   "background_color": "#eef1f4",
   "theme_color": "#2c2c2c",
   "icons": [
@@ -20,6 +20,7 @@
   ]
 
 }
+
 
 
 
