@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Карта - Аналітична панель</title>
 
-      <link rel="manifest" href="manifest.json">
+      <link rel="manifest" href="./manifest.json">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link href="https://cdn.jsdelivr.net/npm/vanilla-calendar-pro@2.9.6/build/vanilla-calendar.min.css" rel="stylesheet">
@@ -540,6 +540,9 @@ body.dark-theme .panel-column h3 {
         <button id="gps-button" class="action-button" title="Знайти моє місцеположення"><i class="fa-solid fa-location-crosshairs"></i></button>
         <button id="upload-button" class="action-button" title="Завантажити логи"><i class="fa-solid fa-upload"></i></button>
         <button id="export-button" class="action-button" title="Експорт (GeoJSON)"><i class="fa-solid fa-file-export"></i></button>
+         <button id="install-button" class="action-button" title="Установить приложение" style="display: none;">
+        <i class="fa-solid fa-download"></i>
+    </button
     </div>
 
     <div id="top-panel" class="collapsed">
@@ -1314,9 +1317,60 @@ map.on('baselayerchange', function(e) {
                     });
             });
         }
+
+        // --- 🚀 ЛОГИКА PWA И КНОПКИ УСТАНОВКИ ---
+
+        // 1. Регистрация Service Worker для офлайн-работы
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('Service Worker зарегистрирован успешно:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Ошибка регистрации Service Worker:', error);
+                    });
+            });
+        }
+
+        // 2. Логика для кнопки "Установить"
+        let deferredPrompt;
+        const installButton = document.getElementById('install-button');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Предотвращаем стандартное поведение браузера
+            e.preventDefault();
+            // Сохраняем событие, чтобы его можно было вызвать позже
+            deferredPrompt = e;
+            // Показываем нашу кастомную кнопку установки
+            installButton.style.display = 'flex';
+        });
+
+        installButton.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                // Показываем стандартный диалог установки
+                deferredPrompt.prompt();
+                // Ждем решения пользователя
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`Пользователь выбрал: ${outcome}`);
+                // Обнуляем событие, так как оно одноразовое
+                deferredPrompt = null;
+                // Прячем кнопку после выбора
+                installButton.style.display = 'none';
+            }
+        });
+
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('Приложение было успешно установлено!');
+        });
+
     </script>
 </body>
 </html>
+    </script>
+</body>
+</html>
+
 
 
 
