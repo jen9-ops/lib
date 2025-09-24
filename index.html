@@ -38,6 +38,13 @@
             overflow: hidden; 
         }
 
+        /* --- Стили календаря по умолчанию --- */
+#calendar-container .vanilla-calendar {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
         #map { 
             width: 100%; 
             height: 100%; 
@@ -452,35 +459,48 @@ body.dark-theme {
 /* Специфичные исправления для элементов в тёмной теме */
 
 /* Делаем фон контрола слоёв тёмным */
-body.dark-theme .leaflet-control-layers {
-    background: var(--bg-color);
-    border: 1px solid var(--border-color);
-    backdrop-filter: blur(10px);
-}
-body.dark-theme .leaflet-control-layers,
-body.dark-theme .leaflet-control-layers-base label span {
-    color: var(--text-color);
+body.dark-theme #calendar-container .vanilla-calendar {
+    background: #ffffff;
+    border-radius: 12px; /* Скругляем углы для вида карточки */
+    padding: 5px; /* Небольшой отступ внутри */
+    border: 1px solid var(--border-color); /* Можно добавить светлую рамку */
 }
 
-/* Адаптируем календарь */
-body.dark-theme #calendar-container .vanilla-calendar {
-    background: transparent;
-    border: none;
-}
-body.dark-theme .vanilla-calendar-week__day,
+/* Тёмный цвет для текста (месяц, год, дни недели) */
 body.dark-theme .vanilla-calendar-month,
 body.dark-theme .vanilla-calendar-year,
-body.dark-theme .vanilla-calendar-day__btn {
-    color: var(--text-color);
-}
-body.dark-theme .vanilla-calendar-arrow:hover {
-    background: rgba(255, 255, 255, 0.1);
+body.dark-theme .vanilla-calendar-week__day {
+    color: #333333; /* Тёмно-серый цвет текста */
 }
 
-/* Фон кнопок при наведении */
-body.dark-theme .action-button:hover {
-    background-color: var(--accent-color);
+/* Убираем фон у стрелок и делаем их тёмными */
+body.dark-theme .vanilla-calendar-arrow {
+    background: transparent !important;
+    color: #555555 !important;
+}
+body.dark-theme .vanilla-calendar-arrow:hover {
+    background: #f0f0f0 !important; /* Светло-серый фон при наведении */
+}
+
+/* Кнопки с датами */
+body.dark-theme .vanilla-calendar-day__btn {
+    background: transparent;
+    color: #2c2c2c; /* Основной тёмный цвет текста */
+}
+body.dark-theme .vanilla-calendar-day__btn:hover {
+    background: #eef1f4; /* Фон при наведении */
+}
+
+/* Выбранный день (остаётся с акцентным цветом) */
+body.dark-theme .vanilla-calendar-day__btn_selected {
+    background: var(--accent-color);
     color: white;
+}
+
+/* Дни с событиями (подсвеченные) */
+body.dark-theme .vanilla-calendar-day__btn_highlighted {
+    background: rgba(0, 122, 255, 0.15); /* Фон чуть менее прозрачный для белого фона */
+    color: #007aff; /* Синий цвет текста */
 }
     </style>
 </head>
@@ -1278,6 +1298,7 @@ map.on('baselayerchange', function(e) {
     </script>
 </body>
 </html>
+
 
 
 
