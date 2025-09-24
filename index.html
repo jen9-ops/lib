@@ -439,6 +439,49 @@
         .loader { border: 8px solid #f3f3f3; border-radius: 50%; border-top: 8px solid var(--accent-color); width: 60px; height: 60px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .intersection-icon { font-size: 24px !important; color: #d92f2f; text-shadow: 0 0 3px rgba(0,0,0,0.5); }
+
+        /* --- СТИЛИ ДЛЯ ТЁМНОЙ ТЕМЫ --- */
+
+body.dark-theme {
+    --bg-color: rgba(28, 28, 30, 0.85); /* Темный полупрозрачный фон */
+    --border-color: rgba(255, 255, 255, 0.15); /* Светлая полупрозрачная рамка */
+    --shadow-color: rgba(0, 0, 0, 0.3); /* Более выраженная тень */
+    --text-color: #f5f5f7; /* Светлый текст (не чисто белый) */
+}
+
+/* Специфичные исправления для элементов в тёмной теме */
+
+/* Делаем фон контрола слоёв тёмным */
+body.dark-theme .leaflet-control-layers {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+}
+body.dark-theme .leaflet-control-layers,
+body.dark-theme .leaflet-control-layers-base label span {
+    color: var(--text-color);
+}
+
+/* Адаптируем календарь */
+body.dark-theme #calendar-container .vanilla-calendar {
+    background: transparent;
+    border: none;
+}
+body.dark-theme .vanilla-calendar-week__day,
+body.dark-theme .vanilla-calendar-month,
+body.dark-theme .vanilla-calendar-year,
+body.dark-theme .vanilla-calendar-day__btn {
+    color: var(--text-color);
+}
+body.dark-theme .vanilla-calendar-arrow:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Фон кнопок при наведении */
+body.dark-theme .action-button:hover {
+    background-color: var(--accent-color);
+    color: white;
+}
     </style>
 </head>
 <body>
@@ -582,6 +625,8 @@
         };
         baseLayers["Стандартна"].addTo(map);
 
+        
+
         // --- Створення шарів для об'єктів на карті ---
         let customPointsLayer = L.layerGroup().addTo(map);
         let drawingsLayer = L.layerGroup().addTo(map);
@@ -590,6 +635,15 @@
         const loader = document.getElementById('loader-overlay');
         const logFileInput = document.getElementById('log-file-input');
         const iframeOverlay = document.getElementById('iframe-overlay');
+
+        // --- Логика автоматического переключения темы ---
+map.on('baselayerchange', function(e) {
+    if (e.name === 'Супутник') {
+        document.body.classList.add('dark-theme');
+    } else {
+        document.body.classList.remove('dark-theme');
+    }
+});
 
         // --- 🧭 ЛОГІКА КЕРУВАННЯ ОСНОВНИМ ІНТЕРФЕЙСОМ ---
 
@@ -1224,5 +1278,6 @@
     </script>
 </body>
 </html>
+
 
 
