@@ -291,55 +291,69 @@
         // --- Работа с Google Sheets ---
         document.getElementById('sync-button').addEventListener('click', () => fetchDataFromSheet(false)); // false = не тихий режим
 
-        async function fetchDataFromSheet(isSilent = false) {
-            if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
-                if (!isSilent) alert('Помилка: URL Google Apps Script не вказано в коді.');
-                return;
+       async function fetchDataFromSheet(isSilent = false) {
+    if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+        if (!isSilent) alert('Помилка: URL Google Apps Script не вказано в коді.');
+        return;
+    }
+    if (!isSilent) loader.style.display = 'flex';
+    
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const sheetData = await response.json();
+        
+        if (isSilent) {
+            // ... (ця частина залишається без змін)
+            const newRowCount = sheetData.length;
+            const newEventsCount = newRowCount - lastSyncRowCount;
+            const syncBadge = document.getElementById('sync-badge');
+            if (newEventsCount > 0) {
+                syncBadge.textContent = newEventsCount;
+                syncBadge.style.display = 'flex';
+            } else {
+                syncBadge.style.display = 'none';
             }
-            if (!isSilent) loader.style.display = 'flex';
-            
-            try {
-                const response = await fetch(GOOGLE_SCRIPT_URL);
-                if (!response.ok) throw new Error('Network response was not ok');
-                const sheetData = await response.json();
-                
-                if (isSilent) {
-                    const newRowCount = sheetData.length;
-                    const newEventsCount = newRowCount - lastSyncRowCount;
-                    const syncBadge = document.getElementById('sync-badge');
-                    if (newEventsCount > 0) {
-                        syncBadge.textContent = newEventsCount;
-                        syncBadge.style.display = 'flex';
-                    } else {
-                        syncBadge.style.display = 'none';
-                    }
-                    return;
-                }
-
-                lastSyncRowCount = sheetData.length;
-                document.getElementById('sync-badge').style.display = 'none';
-
-                const formattedData = sheetData.map((row, index) => {
-                    return {
-                        name: row.Event, timestamp: row.Timestamp, azimuth: row.Azimuth,
-                        distance: row.Distance ? parseInt(row.Distance, 10) : null,
-                        comment: row.Comment, uniqueId: row.UniqueID || `sheet_${index}`,
-                        originCoordinates: { lat: parseFloat(row.Latitude), lon: parseFloat(row.Longitude) },
-                        fileName: `Sheet: ${row.Shift} | ${row.Position}`,
-                        fileColor: generateHslColor(index, sheetData.length)
-                    };
-                });
-                
-                allLogsData = formattedData;
-                initCalendar(); updateMap(); displayEventsList(allLogsData, null);
-                
-            } catch (error) {
-                if (!isSilent) alert('Не вдалося завантажити дані з Google Sheet.');
-                console.error('Fetch error:', error);
-            } finally {
-                if (!isSilent) loader.style.display = 'none';
-            }
+            return;
         }
+
+        lastSyncRowCount = sheetData.length;
+        document.getElementById('sync-badge').style.display = 'none';
+
+        const formattedData = sheetData.map((row, index) => {
+            return {
+                name: row.Event, timestamp: row.Timestamp, azimuth: row.Azimuth,
+                distance: row.Distance ? parseInt(row.Distance, 10) : null,
+                comment: row.Comment, uniqueId: row.UniqueID || `sheet_${index}`,
+                originCoordinates: { lat: parseFloat(row.Latitude), lon: parseFloat(row.Longitude) },
+                fileName: `Sheet: ${row.Shift} | ${row.Position}`,
+                fileColor: generateHslColor(index, sheetData.length)
+            };
+        });
+        
+        // V V V V V V V V V V V V V V V V V V V V V V V V V V V V
+        // ОСЬ ВИРІШЕННЯ: Фільтруємо дані, ігноруючи рядки з невірними координатами
+        const validData = formattedData.filter(log => 
+            !isNaN(log.originCoordinates.lat) && !isNaN(log.originCoordinates.lon)
+        );
+        // ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^
+
+        if (validData.length < formattedData.length && !isSilent) {
+            alert(`Попередження: ${formattedData.length - validData.length} записів з таблиці було проігноровано через невірні координати.`);
+        }
+        
+        allLogsData = validData; // Працюємо тільки з коректними даними
+        initCalendar(); 
+        updateMap(); 
+        displayEventsList(allLogsData, null);
+        
+    } catch (error) {
+        if (!isSilent) alert('Не вдалося завантажити дані з Google Sheet.');
+        console.error('Fetch error:', error);
+    } finally {
+        if (!isSilent) loader.style.display = 'none';
+    }
+}
         
         // --- Загрузка и обработка файлов ---
         function handleFileSelect(event) {
@@ -506,4 +520,5 @@
     </script>
 </body>
 </html>
+
 
