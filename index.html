@@ -15,6 +15,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
+    <script src="https://unpkg.com/leaflet-polylinedecorator@1.6.0/dist/leaflet.polylineDecorator.js"></script>
+
     <style>
         :root {
             --bg-color: rgba(255, 255, 255, 0.85);
@@ -101,6 +103,76 @@
         .loader { border: 8px solid #f3f3f3; border-radius: 50%; border-top: 8px solid var(--accent-color); width: 60px; height: 60px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .intersection-icon { font-size: 24px !important; color: #d92f2f; text-shadow: 0 0 3px rgba(0,0,0,0.5); }
+
+
+        /* --- СТИЛІ МОДАЛЬНОГО ВІКНА --- */
+#event-modal-overlay {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 2500;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+#event-modal-overlay.visible {
+    opacity: 1; visibility: visible;
+}
+#event-modal-content {
+    background: var(--bg-color);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 5px 25px var(--shadow-color);
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    -webkit-backdrop-filter: var(--blur-effect);
+    backdrop-filter: var(--blur-effect);
+}
+.modal-close {
+    position: absolute;
+    top: 10px; right: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-color);
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+.modal-close:hover { opacity: 1; }
+#event-modal-content h3 {
+    margin-top: 0;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+#modal-info p { margin: 8px 0; }
+#modal-info p strong { color: #555; }
+#modal-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 15px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 15px;
+}
+#modal-actions button {
+    border: none;
+    background: var(--accent-color);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+#modal-actions button:hover {
+    background-color: #0056b3;
+}
+        
     </style>
 </head>
 <body>
@@ -140,6 +212,24 @@
     <input type="file" id="log-file-input" multiple accept=".json" style="display: none;">
     <div id="loader-overlay" class="hidden" style="display:none;"><div class="loader"></div></div>
 
+    <div id="event-modal-overlay">
+    <div id="event-modal-content">
+        <button id="modal-close-button" class="modal-close">&times;</button>
+        <h3 id="modal-title">Деталі події</h3>
+        <div id="modal-info">
+            <p><strong>Координати:</strong> <span id="modal-coords"></span></p>
+            <p><strong>Час події:</strong> <span id="modal-datetime"></span></p>
+            <p><strong>Коментар:</strong> <span id="modal-comment"></span></p>
+        </div>
+        <div id="modal-actions">
+            <button id="modal-draw-arrow">Намалювати стрілку</button>
+            <button id="modal-draw-line">Намалювати лінію</button>
+        </div>
+    </div>
+</div>
+
+
+    
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vanilla-calendar-pro@2.9.6/build/vanilla-calendar.min.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
@@ -156,13 +246,16 @@
         };
         baseLayers["Стандартна"].addTo(map);
         
-        // --- Глобальные переменные ---
+             // --- Глобальные переменные ---
         let allLogsData = [], calendar, mapLayersControl, fileLayerGroups = {}, intersectionClusterGroup, selectedCalendarDate = null;
         let mapFeatures = {};
         let customPointsLayer = L.layerGroup().addTo(map);
         let overlayMap = null; 
         let overlayLayersGroup = L.layerGroup();
         let lastSyncRowCount = 0; 
+        let drawingsLayer = L.layerGroup().addTo(map); // <-- ДОБАВИТЬ ЭТО
+        let currentModalLog = null; // <-- И ЭТО
+        
 
         // --- Получение ссылок на DOM ---
         const loader = document.getElementById('loader-overlay');
@@ -412,6 +505,7 @@
             }
             if (intersectionClusterGroup && intersectionClusterGroup.getLayers().length > 0) { overlayMaps[`<i class="fa-solid fa-crosshairs" style="color:#d92f2f;"></i> Перетини`] = intersectionClusterGroup; }
             overlayMaps[`<i class="fa-solid fa-map-pin" style="color:var(--accent-color);"></i> Мої точки`] = customPointsLayer;
+            overlayMaps[`<i class="fa-solid fa-pencil" style="color:#f5a623;"></i> Малюнки`] = drawingsLayer
             mapLayersControl = L.control.layers(baseLayers, overlayMaps, { collapsed: false });
             mapLayersControl.addTo(map);
             document.getElementById('layers-container').appendChild(mapLayersControl.getContainer());
@@ -426,7 +520,10 @@
             const polyline = L.polyline([originPoint, targetPoint], { color: log.fileColor, weight: 3, opacity: 0.9 }).addTo(layerGroup);
             const marker = L.circle(targetPoint, { color: log.fileColor, fillColor: log.fileColor, fillOpacity: 0.4, radius: 25 }).addTo(layerGroup);
             if (!isOverlay) {
-                marker.bindPopup(`<b>${log.name}</b><br><b>Дист:</b> ${log.distance} м`);
+                // marker.bindPopup(`<b>${log.name}</b><br><b>Дист:</b> ${log.distance} м`);
+                 marker.on('click', () => { // ДОБАВЬТЕ ЭТОТ ОБРАБОТЧИК
+                    openEventModal(log, targetPoint);
+            });
                 mapFeatures[log.uniqueId] = { marker, polyline };
             }
         }
@@ -464,6 +561,80 @@
             setInterval(() => fetchDataFromSheet(true), 30000);
         });
 
+        // --- ЛОГІКА МОДАЛЬНОГО ВІКНА ТА РИСУВАННЯ ---
+
+const eventModalOverlay = document.getElementById('event-modal-overlay');
+
+function openEventModal(log, coordinates) {
+    currentModalLog = {log: log, coordinates: coordinates}; // Сохраняем данные для функций рисования
+    
+    // Заполняем окно данными
+    document.getElementById('modal-title').textContent = log.name || 'Деталі події';
+    document.getElementById('modal-coords').textContent = `${coordinates[0].toFixed(5)}, ${coordinates[1].toFixed(5)}`;
+    const eventDate = new Date(log.timestamp);
+    document.getElementById('modal-datetime').textContent = eventDate.toLocaleString('uk-UA', { dateStyle: 'medium', timeStyle: 'short' });
+    document.getElementById('modal-comment').textContent = log.comment || 'Немає';
+
+    // Показываем окно
+    eventModalOverlay.classList.add('visible');
+}
+
+function closeModal() {
+    eventModalOverlay.classList.remove('visible');
+    currentModalLog = null;
+    map.off('click'); // Отключаем все обработчики кликов на карте на всякий случай
+    document.getElementById('map').classList.remove('map-placement-mode');
+}
+
+// Обработчики закрытия окна
+document.getElementById('modal-close-button').addEventListener('click', closeModal);
+eventModalOverlay.addEventListener('click', (e) => {
+    if (e.target === eventModalOverlay) {
+        closeModal();
+    }
+});
+
+// Обработчики кнопок рисования
+document.getElementById('modal-draw-arrow').addEventListener('click', () => startDrawing('arrow'));
+document.getElementById('modal-draw-line').addEventListener('click', () => startDrawing('line'));
+
+function startDrawing(type) {
+    if (!currentModalLog) return;
+    
+    eventModalOverlay.classList.remove('visible'); // Скрываем окно для рисования
+    document.getElementById('map').classList.add('map-placement-mode'); // Включаем курсор-крестик
+    
+    const startPoint = currentModalLog.coordinates;
+    
+    map.once('click', (e) => {
+        const endPoint = e.latlng;
+        const latlngs = [startPoint, [endPoint.lat, endPoint.lng]];
+        
+        let lineOptions = {
+            color: currentModalLog.log.fileColor || '#ff0000',
+            weight: 3
+        };
+
+        if (type === 'line') {
+            lineOptions.dashArray = '5, 10'; // Штрих-пунктирная линия
+        }
+
+        const polyline = L.polyline(latlngs, lineOptions).addTo(drawingsLayer);
+
+        if (type === 'arrow') {
+            L.polylineDecorator(polyline, {
+                patterns: [
+                    { offset: '100%', repeat: 0, symbol: L.Symbol.arrowHead({ pixelSize: 15, polygon: false, pathOptions: { stroke: true, color: lineOptions.color } }) }
+                ]
+            }).addTo(drawingsLayer);
+        }
+        
+        document.getElementById('map').classList.remove('map-placement-mode');
+        currentModalLog = null;
+    });
+}
+        
     </script>
 </body>
 </html>
+
