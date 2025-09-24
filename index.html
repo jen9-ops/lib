@@ -29,17 +29,112 @@
         html, body { height: 100%; margin: 0; padding: 0; font-family: 'Inter', sans-serif; color: var(--text-color); background-color: #eef1f4; overflow: hidden; }
         #map { width: 100%; height: 100%; }
         
-        #top-panel { position: absolute; top: 0; left: 0; right: 0; z-index: 1000; background: var(--bg-color); -webkit-backdrop-filter: var(--blur-effect); backdrop-filter: var(--blur-effect); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px var(--shadow-color); }
-        .panel-header { padding: 0 20px; height: 55px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .panel-header h2 { margin: 0; font-size: 18px; }
-        #panel-toggle-icon { transition: transform var(--transition-speed) ease; }
-        #top-panel.collapsed #panel-toggle-icon { transform: rotate(-180deg); }
-        
-        .panel-content { max-height: 0; overflow: hidden; transition: max-height var(--transition-speed) ease-in-out; display: flex; padding: 0 10px; border-top: 1px solid transparent; }
-        #top-panel:not(.collapsed) .panel-content { max-height: 50vh; padding: 10px; border-top-color: var(--border-color); }
-        
-        .panel-column { padding: 0 10px; height: calc(50vh - 20px); display: flex; flex-direction: column; }
-        .panel-column h3 { margin: 0 0 10px 0; font-size: 16px; font-weight: 600; padding-bottom: 5px; border-bottom: 1px solid var(--border-color); }
+  /* --- СТИЛІ КНОПКИ ВІДКРИТТЯ ПАНЕЛІ --- */
+#panel-toggle-container {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1001; /* Поверх панелі */
+}
+#panel-toggle-button {
+    width: 45px;
+    height: 45px;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--text-color);
+    box-shadow: 0 4px 20px var(--shadow-color);
+    -webkit-backdrop-filter: var(--blur-effect);
+    backdrop-filter: var(--blur-effect);
+    transition: all var(--transition-speed);
+}
+#panel-toggle-button:hover {
+    transform: scale(1.1);
+    color: var(--accent-color);
+}
+
+/* --- НОВІ СТИЛІ АДАПТИВНОЇ ПАНЕЛІ --- */
+#top-panel {
+    position: absolute;
+    top: 65px; /* Нижче кнопки */
+    left: 10px;
+    width: calc(100% - 20px); /* Адаптивна ширина */
+    max-width: 1200px; /* Обмеження на великих екранах */
+    z-index: 1000;
+    
+    background: var(--bg-color);
+    -webkit-backdrop-filter: var(--blur-effect);
+    backdrop-filter: var(--blur-effect);
+    
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 30px var(--shadow-color);
+    border-radius: 12px;
+    
+    /* Анімація появи/зникнення */
+    transition: opacity var(--transition-speed), transform var(--transition-speed), visibility var(--transition-speed);
+    transform-origin: top left;
+}
+#top-panel.collapsed {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px) scale(0.95);
+}
+
+.panel-header {
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+}
+.panel-header h2 { margin: 0; font-size: 18px; }
+
+/* Адаптивний контейнер для колонок */
+.panel-content {
+    display: flex;
+    flex-wrap: wrap; /* Дозволяє колонкам переноситись на новий рядок */
+    gap: 15px;
+    padding: 15px;
+    max-height: 70vh; /* Обмеження висоти */
+    overflow-y: auto; /* Додає скрол, якщо контенту забагато */
+}
+
+/* Адаптивні колонки */
+.panel-column {
+    padding: 0 10px;
+    display: flex;
+    flex-direction: column;
+    min-width: 280px; /* Мінімальна ширина колонки */
+    flex: 1; /* Дозволяє колонкам розтягуватись */
+}
+.panel-column h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    font-weight: 600;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--border-color);
+}
+#events-column { flex-basis: 35%; } /* Даємо більше місця подіям */
+#layers-column { flex-basis: 25%; }
+#calendar-column { flex-basis: 300px; flex-grow: 0; } /* Фіксована база для календаря */
+
+#action-buttons {
+    display: flex;
+    gap: 5px; /* Зменшимо відступ */
+    flex-wrap: wrap; /* Дозволяє кнопкам переноситись */
+    justify-content: flex-end;
+}
+.action-button {
+    font-size: 16px; /* Трохи менше */
+    padding: 8px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+.action-button:hover {
+    background-color: rgba(0,0,0,0.1);
+}
         #calendar-column { flex: 0 0 300px; }
         #events-column { flex: 1 1 40%; overflow-y: auto; }
         #layers-column { flex: 1 1 30%; }
@@ -105,23 +200,37 @@
 </head>
 <body>
     <div id="map"></div>
-    
-    <div id="top-panel" class="collapsed">
-        <div class="panel-header" id="panel-header-toggle">
-            <h2>Аналітична панель</h2>
-            <div id="action-buttons">
-                <button id="sync-button" class="action-button" title="Синхронізувати з Google Sheet">
-                    <i class="fa-solid fa-sync"></i>
-                    <span id="sync-badge"></span>
-                </button>
-                <button id="deepstate-button" class="action-button" title="Наложение на DeepState Map"><i class="fa-solid fa-layer-group"></i></button>
-                <button id="add-point-button" class="action-button" title="Додати власну точку"><i class="fa-solid fa-map-pin"></i></button>
-                <button id="gps-button" class="action-button" title="Знайти моє місцеположення"><i class="fa-solid fa-location-crosshairs"></i></button>
-                <button id="upload-button" class="action-button" title="Завантажити логи"><i class="fa-solid fa-upload"></i></button>
-                <button id="export-button" class="action-button" title="Експорт перетинів (GeoJSON)"><i class="fa-solid fa-file-export"></i></button>
-                <i class="fa-solid fa-chevron-down" id="panel-toggle-icon" style="margin-left: 20px;"></i>
-            </div>
+
+    <div id="panel-toggle-container">
+    <button id="panel-toggle-button" title="Відкрити аналітичну панель">
+        <i class="fa-solid fa-layer-group"></i>
+    </button>
+    </div>
+
+<div id="top-panel" class="collapsed">
+    <div class="panel-header">
+        <h2>Аналітична панель</h2>
+        <div id="action-buttons">
+            <button id="sync-button" class="action-button" title="Синхронізувати з Google Sheet">
+                <i class="fa-solid fa-sync"></i>
+                <span id="sync-badge"></span>
+            </button>
+            <button id="deepstate-button" class="action-button" title="Наложение на DeepState Map"><i class="fa-solid fa-layer-group"></i></button>
+            <button id="add-point-button" class="action-button" title="Додати власну точку"><i class="fa-solid fa-pencil"></i></button>
+            <button id="draw-button" class="action-button" title="Інструменти малювання"><i class="fa-solid fa-pencil-ruler"></i></button>
+            <button id="add-icon-button" class="action-button" title="Додати власний маркер"><i class="fa-solid fa-map-marker-plus"></i></button>
+            <button id="gps-button" class="action-button" title="Знайти моє місцеположення"><i class="fa-solid fa-location-crosshairs"></i></button>
+            <button id="upload-button" class="action-button" title="Завантажити логи"><i class="fa-solid fa-upload"></i></button>
+            <button id="export-button" class="action-button" title="Експорт (GeoJSON)"><i class="fa-solid fa-file-export"></i></button>
         </div>
+    </div>
+    <div class="panel-content">
+        <div class="panel-column" id="calendar-column"><h3>Календар</h3><div id="calendar-container"></div></div>
+        <div class="panel-column" id="events-column"><h3 id="events-list-title">Події</h3><ul id="events-list"></ul></div>
+        <div class="panel-column" id="layers-column"><h3>Шари карти</h3><div id="layers-container"></div></div>
+    </div>
+</div>
+    
         <div class="panel-content">
             <div class="panel-column" id="calendar-column"><h3>Календар</h3><div id="calendar-container"></div></div>
             <div class="panel-column" id="events-column"><h3 id="events-list-title">Події</h3><ul id="events-list"></ul></div>
@@ -170,10 +279,27 @@
         const iframeOverlay = document.getElementById('iframe-overlay');
         
         // --- Управление интерфейсом ---
-        document.getElementById('panel-header-toggle').addEventListener('click', (e) => {
-            if (e.target.closest('.action-button')) return;
-            document.getElementById('top-panel').classList.toggle('collapsed');
-        });
+      // --- НОВА ЛОГІКА КЕРУВАННЯ ПАНЕЛЛЮ ---
+
+const panelToggleButton = document.getElementById('panel-toggle-button');
+const topPanel = document.getElementById('top-panel');
+
+// Відкриття/закриття панелі по кліку на кнопку-іконку
+panelToggleButton.addEventListener('click', (e) => {
+    e.stopPropagation(); // Зупиняємо спливання події, щоб не спрацював клік "поза панеллю"
+    topPanel.classList.toggle('collapsed');
+});
+
+// Закриття панелі при кліку поза нею
+document.addEventListener('click', (e) => {
+    const isClickInsidePanel = e.target.closest('#top-panel');
+    const isClickOnToggleButton = e.target.closest('#panel-toggle-button');
+
+    // Якщо панель відкрита і клік був не по ній і не по кнопці її відкриття
+    if (!topPanel.classList.contains('collapsed') && !isClickInsidePanel && !isClickOnToggleButton) {
+        topPanel.classList.add('collapsed');
+    }
+});
 
         // --- Привязка действий к кнопкам ---
         document.getElementById('gps-button').addEventListener('click', () => {
@@ -467,3 +593,4 @@
     </script>
 </body>
 </html>
+
