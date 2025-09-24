@@ -16,6 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
+        /* --- Повний CSS-код додатку --- */
         :root {
             --bg-color: rgba(255, 255, 255, 0.85);
             --blur-effect: backdrop-filter: blur(10px);
@@ -26,66 +27,91 @@
             --transition-speed: 0.3s;
         }
 
-        html, body { height: 100%; margin: 0; padding: 0; font-family: 'Inter', sans-serif; color: var(--text-color); background-color: #eef1f4; overflow: hidden; }
-        #map { width: 100%; height: 100%; }
-        
-        #top-panel { position: absolute; top: 0; left: 0; right: 0; z-index: 1000; background: var(--bg-color); -webkit-backdrop-filter: var(--blur-effect); backdrop-filter: var(--blur-effect); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 20px var(--shadow-color); }
-        .panel-header { padding: 0 20px; height: 55px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .panel-header h2 { margin: 0; font-size: 18px; }
-        #panel-toggle-icon { transition: transform var(--transition-speed) ease; }
-        #top-panel.collapsed #panel-toggle-icon { transform: rotate(-180deg); }
-        
-        .panel-content { max-height: 0; overflow: hidden; transition: max-height var(--transition-speed) ease-in-out; display: flex; padding: 0 10px; border-top: 1px solid transparent; }
-        #top-panel:not(.collapsed) .panel-content { max-height: 50vh; padding: 10px; border-top-color: var(--border-color); }
-        
-        .panel-column { padding: 0 10px; height: calc(50vh - 20px); display: flex; flex-direction: column; }
-        .panel-column h3 { margin: 0 0 10px 0; font-size: 16px; font-weight: 600; padding-bottom: 5px; border-bottom: 1px solid var(--border-color); }
-        #calendar-column { flex: 0 0 300px; }
-        #events-column { flex: 1 1 40%; overflow-y: auto; }
-        #layers-column { flex: 1 1 30%; }
+        html, body { 
+            height: 100%; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Inter', sans-serif; 
+            color: var(--text-color); 
+            background-color: #eef1f4; 
+            overflow: hidden; 
+        }
 
-      /* --- СТИЛІ ДЛЯ ПАНЕЛІ ІНСТРУМЕНТІВ --- */
-#action-buttons {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 1001; /* Поверх карти */
-    
-    display: flex;
-    flex-direction: column; /* Вертикальне розташування */
-    gap: 8px;
-    
-    background: var(--bg-color);
-    -webkit-backdrop-filter: var(--blur-effect);
-    backdrop-filter: var(--blur-effect);
-    
-    padding: 8px;
-    border-radius: 10px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 4px 20px var(--shadow-color);
-}
+        #map { 
+            width: 100%; 
+            height: 100%; 
+        }
 
-.action-button {
-    width: 40px;
-    height: 40px;
-    background: none;
-    border: none;
-    border-radius: 6px;
-    font-size: 18px; /* Збільшимо іконки */
-    cursor: pointer;
-    color: var(--text-color);
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 0.2s, color 0.2s;
-}
+        /* --- СТИЛІ КНОПКИ ВІДКРИТТЯ ПАНЕЛІ --- */
+        #panel-toggle-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1001; /* Поверх панелі */
+        }
 
-.action-button:hover {
-    background-color: var(--accent-color);
-    color: white;
-}
-        
+        #panel-toggle-button {
+            width: 45px;
+            height: 45px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            color: var(--text-color);
+            box-shadow: 0 4px 20px var(--shadow-color);
+            -webkit-backdrop-filter: var(--blur-effect);
+            backdrop-filter: var(--blur-effect);
+            transition: all var(--transition-speed);
+        }
+
+        #panel-toggle-button:hover {
+            transform: scale(1.1);
+            color: var(--accent-color);
+        }
+
+        /* --- СТИЛІ ДЛЯ ПАНЕЛІ ІНСТРУМЕНТІВ --- */
+        #action-buttons {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1001; /* Поверх карти */
+            
+            display: flex;
+            flex-direction: column; /* Вертикальне розташування */
+            gap: 8px;
+            
+            background: var(--bg-color);
+            -webkit-backdrop-filter: var(--blur-effect);
+            backdrop-filter: var(--blur-effect);
+            
+            padding: 8px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px var(--shadow-color);
+        }
+
+        .action-button {
+            width: 40px;
+            height: 40px;
+            background: none;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--text-color);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .action-button:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
         #sync-badge {
             position: absolute;
             top: 0;
@@ -103,19 +129,270 @@
             transform: translate(40%, -40%);
             display: none; 
         }
-        
+
+        /* --- НОВІ СТИЛІ АДАПТИВНОЇ АНАЛІТИЧНОЇ ПАНЕЛІ --- */
+        #top-panel {
+            position: absolute;
+            top: 65px; /* Нижче кнопки */
+            left: 10px;
+            width: calc(100% - 20px); /* Адаптивна ширина */
+            max-width: 1200px; /* Обмеження на великих екранах */
+            z-index: 1000;
+            
+            background: var(--bg-color);
+            -webkit-backdrop-filter: var(--blur-effect);
+            backdrop-filter: var(--blur-effect);
+            
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 30px var(--shadow-color);
+            border-radius: 12px;
+            
+            /* Анімація появи/зникнення */
+            transition: opacity var(--transition-speed), transform var(--transition-speed), visibility var(--transition-speed);
+            transform-origin: top left;
+        }
+
+        #top-panel.collapsed {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px) scale(0.95);
+        }
+
+        .panel-header {
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap; 
+            gap: 10px;
+        }
+        .panel-header h2 { margin: 0; font-size: 18px; }
+
+        .panel-content {
+            display: flex;
+            flex-wrap: wrap; 
+            gap: 15px;
+            padding: 15px;
+            max-height: 70vh; 
+            overflow-y: auto; 
+        }
+
+        .panel-column {
+            padding: 0 10px;
+            display: flex;
+            flex-direction: column;
+            min-width: 280px; 
+            flex: 1; 
+        }
+        .panel-column h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            font-weight: 600;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        #events-column { flex-basis: 35%; }
+        #layers-column { flex-basis: 25%; }
+        #calendar-column { flex-basis: 300px; flex-grow: 0; }
+
+        /* --- СПИСОК ПОДІЙ ТА ШАРИ --- */
         #events-list { list-style: none; padding: 0; margin: 0; }
         #events-list li { padding: 10px 8px; font-size: 14px; border-radius: 6px; cursor: pointer; transition: background-color 0.2s; }
         #events-list li:hover, #events-list li.highlighted { background-color: rgba(0, 122, 255, 0.1); }
         .layer-legend-color { display: inline-block; width: 12px; height: 12px; margin-right: 8px; border-radius: 3px; vertical-align: middle;}
-
         #layers-container .leaflet-control-layers { border: none; box-shadow: none; background: transparent; }
 
+        /* --- СТИЛІ МОДАЛЬНИХ ВІКОН --- */
+        #event-modal-overlay, .event-modal-overlay-custom {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 2500;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        #event-modal-overlay.visible, .event-modal-overlay-custom.visible {
+            opacity: 1; visibility: visible;
+        }
+
+        #event-modal-content, .event-modal-content-custom {
+            background: var(--bg-color);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px var(--shadow-color);
+            width: 90%;
+            position: relative;
+            -webkit-backdrop-filter: var(--blur-effect);
+            backdrop-filter: var(--blur-effect);
+        }
+        #event-modal-content { max-width: 500px; }
+        #drawing-modal-content { max-width: 600px; }
+
+
+        .modal-close, .modal-close-custom {
+            position: absolute;
+            top: 10px; right: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-color);
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .modal-close:hover, .modal-close-custom:hover { opacity: 1; }
+
+        #event-modal-content h3, .event-modal-content-custom h3 {
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .event-modal-content-custom h3 { text-align: center; }
+
+        #modal-info p { margin: 8px 0; }
+        #modal-info p strong { color: #555; }
+        #modal-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
+        }
+        #modal-actions button {
+            border: none;
+            background: var(--accent-color);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        #modal-actions button:hover {
+            background-color: #0056b3;
+        }
+
+        /* --- СТИЛІ ДЛЯ ІНСТРУМЕНТІВ МАЛЮВАННЯ --- */
+        #drawing-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .draw-option-button {
+            background-color: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: background-color 0.2s, transform 0.2s;
+            text-align: center;
+        }
+        .draw-option-button:hover {
+            background-color: rgba(0, 122, 255, 0.1);
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+        .draw-option-button i {
+            font-size: 24px;
+            color: var(--accent-color);
+        }
+
+        /* --- СТИЛІ ДЛЯ ФОРМ В МОДАЛЬНИХ ВІКНАХ --- */
+        #custom-point-modal-content .form-group {
+            margin-bottom: 15px;
+        }
+        #custom-point-modal-content label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        #custom-point-modal-content input[type="text"],
+        #custom-point-modal-content input[type="file"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        #custom-point-modal-content .source-toggle,
+        .background-processing-toggle {
+            display: flex;
+            gap: 15px;
+            justify-content: space-around;
+            background-color: rgba(0,0,0,0.05);
+            padding: 8px;
+            border-radius: 6px;
+        }
+        #place-point-submit {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            background: var(--accent-color);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background-color 0.2s;
+        }
+        #place-point-submit:hover {
+            background-color: #0056b3;
+        }
+        .color-picker-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: rgba(0,0,0,0.05);
+            border-radius: 8px;
+        }
+        .color-picker-container label {
+            font-weight: 500;
+        }
+        #drawing-color-picker, #circle-bg-color-picker {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 40px;
+            height: 40px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+        }
+        #drawing-color-picker::-webkit-color-swatch,
+        #circle-bg-color-picker::-webkit-color-swatch {
+            border-radius: 50%;
+            border: 2px solid rgba(0,0,0,0.2);
+        }
+        #drawing-color-picker::-moz-color-swatch,
+        #circle-bg-color-picker::-moz-color-swatch {
+            border-radius: 50%;
+            border: 2px solid rgba(0,0,0,0.2);
+        }
+
+
+        /* --- ІНШІ СТИЛІ --- */
         .map-placement-mode { cursor: crosshair !important; }
-        .custom-point-popup input { border: 1px solid #ccc; padding: 8px; border-radius: 4px; width: calc(100% - 18px); }
-        .custom-point-popup button { border: none; background: var(--accent-color); color: white; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-top: 8px; }
-        .custom-point-popup p { margin: 5px 0; font-weight: bold; }
-        
+
         #iframe-overlay {
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
@@ -128,12 +405,10 @@
             transition: opacity 0.3s, visibility 0.3s;
         }
         #iframe-overlay.visible { opacity: 1; visibility: visible; }
-
         .iframe-container { width: 95%; height: 85%; position: relative; }
         #deepstate-iframe { width: 100%; height: 100%; border: 1px solid var(--border-color); border-radius: 8px; background: #fff; }
         #leaflet-overlay-map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; background: transparent; pointer-events: none; }
         #leaflet-overlay-map .leaflet-tile-pane { opacity: 0; }
-        
         #transfer-coords-button { padding: 12px 25px; font-size: 16px; font-weight: 600; background: var(--accent-color); color: white; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 
         #loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 3000; display: flex; justify-content: center; align-items: center; }
@@ -144,22 +419,26 @@
 </head>
 <body>
     <div id="map"></div>
-    
+
+    <div id="panel-toggle-container">
+        <button id="panel-toggle-button" title="Аналітична панель">
+            <i class="fa-solid fa-sliders"></i>
+        </button>
+    </div>
+
+    <div id="action-buttons">
+        <button id="sync-button" class="action-button" title="Синхронізувати з Google Sheet"><i class="fa-solid fa-sync"></i><span id="sync-badge"></span></button>
+        <button id="deepstate-button" class="action-button" title="Наложение на DeepState Map"><i class="fa-solid fa-layer-group"></i></button>
+        <button id="add-point-button" class="action-button" title="Додати власну точку"><i class="fa-solid fa-map-pin"></i></button>
+        <button id="draw-button" class="action-button" title="Інструменти малювання"><i class="fa-solid fa-pencil-ruler"></i></button>
+        <button id="gps-button" class="action-button" title="Знайти моє місцеположення"><i class="fa-solid fa-location-crosshairs"></i></button>
+        <button id="upload-button" class="action-button" title="Завантажити логи"><i class="fa-solid fa-upload"></i></button>
+        <button id="export-button" class="action-button" title="Експорт (GeoJSON)"><i class="fa-solid fa-file-export"></i></button>
+    </div>
+
     <div id="top-panel" class="collapsed">
-        <div class="panel-header" id="panel-header-toggle">
+        <div class="panel-header">
             <h2>Аналітична панель</h2>
-            <div id="action-buttons">
-                <button id="sync-button" class="action-button" title="Синхронізувати з Google Sheet">
-                    <i class="fa-solid fa-sync"></i>
-                    <span id="sync-badge"></span>
-                </button>
-                <button id="deepstate-button" class="action-button" title="Наложение на DeepState Map"><i class="fa-solid fa-layer-group"></i></button>
-                <button id="add-point-button" class="action-button" title="Додати власну точку"><i class="fa-solid fa-map-pin"></i></button>
-                <button id="gps-button" class="action-button" title="Знайти моє місцеположення"><i class="fa-solid fa-location-crosshairs"></i></button>
-                <button id="upload-button" class="action-button" title="Завантажити логи"><i class="fa-solid fa-upload"></i></button>
-                <button id="export-button" class="action-button" title="Експорт перетинів (GeoJSON)"><i class="fa-solid fa-file-export"></i></button>
-                <i class="fa-solid fa-chevron-down" id="panel-toggle-icon" style="margin-left: 20px;"></i>
-            </div>
         </div>
         <div class="panel-content">
             <div class="panel-column" id="calendar-column"><h3>Календар</h3><div id="calendar-container"></div></div>
@@ -179,14 +458,98 @@
     <input type="file" id="log-file-input" multiple accept=".json" style="display: none;">
     <div id="loader-overlay" class="hidden" style="display:none;"><div class="loader"></div></div>
 
+    <div id="event-modal-overlay">
+        <div id="event-modal-content">
+            <button id="modal-close-button" class="modal-close">&times;</button>
+            <h3 id="modal-title">Деталі події</h3>
+            <div id="modal-info">
+                <p><strong>Координати:</strong> <span id="modal-coords"></span></p>
+                <p><strong>Час події:</strong> <span id="modal-datetime"></span></p>
+                <p><strong>Коментар:</strong> <span id="modal-comment"></span></p>
+            </div>
+            <div id="modal-actions">
+                <button id="modal-draw-arrow">Намалювати стрілку</button>
+                <button id="modal-draw-line">Намалювати лінію</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="drawing-modal-overlay" class="event-modal-overlay-custom">
+        <div id="drawing-modal-content" class="event-modal-content-custom">
+            <button id="drawing-modal-close-button" class="modal-close-custom">&times;</button>
+            <h3>Інструменти малювання</h3>
+            <p style="text-align: center; margin-top: -10px; opacity: 0.7;">Оберіть інструмент, колір, а потім клацніть на карті для малювання.</p>
+            <div class="color-picker-container">
+                <label for="drawing-color-picker">Колір:</label>
+                <input type="color" id="drawing-color-picker" value="#ff4747">
+            </div>
+            <div id="drawing-options">
+                <button class="draw-option-button" data-draw-type="arrow"><i class="fa-solid fa-arrow-right"></i><span>Стрілка</span></button>
+                <button class="draw-option-button" data-draw-type="repeating-arrow"><i class="fa-solid fa-angles-right"></i><span>Повтор. стрілки</span></button>
+                <button class="draw-option-button" data-draw-type="animated-arrow"><i class="fa-solid fa-play"></i><span>Анімована стрілка</span></button>
+                <button class="draw-option-button" data-draw-type="flexible-line"><i class="fa-solid fa-wave-square"></i><span>Вигнута лінія</span></button>
+                <button class="draw-option-button" data-draw-type="dashed-line"><i class="fa-solid fa-grip-lines"></i><span>Пунктир</span></button>
+                <button class="draw-option-button" data-draw-type="animated-ants"><i class="fa-solid fa-person-running"></i><span>Анімований пунктир</span></button>
+                <button class="draw-option-button" data-draw-type="icon-line"><i class="fa-solid fa-location-dot"></i><span>Лінія з іконками</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom-point-modal-overlay" class="event-modal-overlay-custom">
+        <div id="custom-point-modal-content" class="event-modal-content-custom" style="max-width: 450px;">
+            <button id="custom-point-modal-close-button" class="modal-close-custom">&times;</button>
+            <h3>Параметри точки</h3>
+            <div class="form-group">
+                <label for="point-name-input">Назва:</label>
+                <input type="text" id="point-name-input" placeholder="Наприклад, 'Позиція 1'">
+            </div>
+            <div class="form-group">
+                <label>Іконка:</label>
+                <div class="source-toggle">
+                    <label><input type="radio" name="point-icon-source" value="default" checked> Стандартна</label>
+                    <label><input type="radio" name="point-icon-source" value="url"> URL</label>
+                    <label><input type="radio" name="point-icon-source" value="file"> Файл</label>
+                </div>
+            </div>
+            <div id="point-url-source-group" class="form-group" style="display: none;">
+                <label for="point-url-input">Посилання на іконку:</label>
+                <input type="text" id="point-url-input" placeholder="https://example.com/icon.png">
+            </div>
+            <div id="point-file-source-group" class="form-group" style="display: none;">
+                <label for="point-file-input">Завантажити файл (PNG, JPG, SVG):</label>
+                <input type="file" id="point-file-input" accept="image/*">
+            </div>
+            <div class="form-group">
+                <label>Обробка фону іконки:</label>
+                <div class="background-processing-toggle">
+                    <label><input type="radio" name="icon-background-processing" value="none" checked> Без змін</label>
+                    <label><input type="radio" name="icon-background-processing" value="circle-bg"> Круглий фон</label>
+                    <label><input type="radio" name="icon-background-processing" value="white-to-transparent"> Білий в прозорий</label>
+                </div>
+                <div id="circle-bg-color-group" class="form-group" style="display: none; margin-top: 10px;">
+                    <label for="circle-bg-color-picker">Колір фону:</label>
+                    <input type="color" id="circle-bg-color-picker" value="#ffffff">
+                </div>
+            </div>
+            <button id="place-point-submit">Розмістити на карті</button>
+        </div>
+    </div>
+    
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-polylinedecorator@1.6.0/dist/leaflet.polylineDecorator.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vanilla-calendar-pro@2.9.6/build/vanilla-calendar.min.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
     <script>
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwWLzQoJq0hfHer7Vsdk2xJe_Z7aNA4SRhiU0NWkMPv3IZAdcMFkyH-GrkXm6WK5SEZ/exec'; 
+        // --- Повний JavaScript-код додатку ---
 
-        // --- Инициализация карты ---
+        // --- Глобальні константи та змінні ---
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwWLzQoJq0hfHer7Vsdk2xJe_Z7aNA4SRhiU0NWkMPv3IZAdcMFkyH-GrkXm6WK5SEZ/exec';
+        let allLogsData = [], calendar, mapLayersControl, fileLayerGroups = {}, intersectionClusterGroup, selectedCalendarDate = null;
+        let mapFeatures = {};
+        let lastSyncRowCount = 0;
+
+        // --- Ініціалізація карти та шарів ---
         const map = L.map('map', { zoomControl: false }).setView([50.41, 30.64], 11);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
         const baseLayers = {
@@ -194,43 +557,42 @@
             "Супутник": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '&copy; Esri' }),
         };
         baseLayers["Стандартна"].addTo(map);
-        
-        // --- Глобальные переменные ---
-        let allLogsData = [], calendar, mapLayersControl, fileLayerGroups = {}, intersectionClusterGroup, selectedCalendarDate = null;
-        let mapFeatures = {};
-        let customPointsLayer = L.layerGroup().addTo(map);
-        let overlayMap = null; 
-        let overlayLayersGroup = L.layerGroup();
-        let lastSyncRowCount = 0; 
 
-        // --- Получение ссылок на DOM ---
+        // --- Створення шарів для об'єктів на карті ---
+        let customPointsLayer = L.layerGroup().addTo(map);
+        let drawingsLayer = L.layerGroup().addTo(map);
+
+        // --- Отримання посилань на DOM-елементи ---
         const loader = document.getElementById('loader-overlay');
         const logFileInput = document.getElementById('log-file-input');
         const iframeOverlay = document.getElementById('iframe-overlay');
-        
-        // --- Управление интерфейсом ---
-        document.getElementById('panel-header-toggle').addEventListener('click', (e) => {
-            if (e.target.closest('.action-button')) return;
-            document.getElementById('top-panel').classList.toggle('collapsed');
+
+        // --- 🧭 ЛОГІКА КЕРУВАННЯ ОСНОВНИМ ІНТЕРФЕЙСОМ ---
+
+        // Керування плаваючою аналітичною панеллю
+        const panelToggleButton = document.getElementById('panel-toggle-button');
+        const topPanel = document.getElementById('top-panel');
+
+        panelToggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            topPanel.classList.toggle('collapsed');
         });
 
-        // --- Привязка действий к кнопкам ---
-        document.getElementById('gps-button').addEventListener('click', () => {
-            navigator.geolocation.getCurrentPosition(pos => {
-                const lat = pos.coords.latitude, lon = pos.coords.longitude, zoom = 13;
-                map.flyTo([lat, lon], zoom);
-                const deepstateIframe = document.getElementById('deepstate-iframe');
-                deepstateIframe.src = `https://deepstatemap.live/#${zoom}/${lat.toFixed(5)}/${lon.toFixed(5)}`;
-            }, () => alert("Помилка GPS"));
+        document.addEventListener('click', (e) => {
+            const isClickInsidePanel = e.target.closest('#top-panel');
+            const isClickOnToggleButton = e.target.closest('#panel-toggle-button');
+            if (!topPanel.classList.contains('collapsed') && !isClickInsidePanel && !isClickOnToggleButton) {
+                topPanel.classList.add('collapsed');
+            }
         });
 
-        document.getElementById('upload-button').addEventListener('click', () => logFileInput.click());
-        logFileInput.addEventListener('change', handleFileSelect);
-        document.getElementById('add-point-button').addEventListener('click', enterPointPlacementMode);
-        
-        // --- DeepState Map оверлей ---
+        // Керування DeepState оверлеєм
+        let overlayMap = null;
+        let overlayLayersGroup = L.layerGroup();
+
         document.getElementById('deepstate-button').addEventListener('click', () => {
-            const center = map.getCenter(); const zoom = map.getZoom();
+            const center = map.getCenter(); 
+            const zoom = map.getZoom();
             document.getElementById('deepstate-iframe').src = `https://deepstatemap.live/#${zoom}/${center.lat.toFixed(5)}/${center.lng.toFixed(5)}`;
             iframeOverlay.classList.add('visible');
             if (!overlayMap) {
@@ -239,13 +601,17 @@
             overlayMap.setView(center, zoom);
             populateOverlayMap();
         });
+
         document.getElementById('transfer-coords-button').addEventListener('click', () => {
             iframeOverlay.classList.remove('visible');
-            document.getElementById('map').classList.add('map-placement-mode');
-            map.once('click', (e) => {
-                createCustomPoint(e.latlng, 'Точка з DeepState');
-                document.getElementById('map').classList.remove('map-placement-mode');
+            const center = overlayMap.getCenter();
+            const defaultIcon = L.divIcon({
+                className: 'fa-solid fa-map-pin',
+                iconSize: [24, 24],
+                html: `<i class="fa-solid fa-map-pin" style="font-size: 24px; color: var(--accent-color); text-shadow: 0 0 3px rgba(0,0,0,0.5);"></i>`
             });
+            // Використовуємо нову функцію для створення точки
+            startMarkerPlacement(`Точка з DeepState (${center.lat.toFixed(4)}, ${center.lng.toFixed(4)})`, defaultIcon, center);
         });
 
         function populateOverlayMap() {
@@ -256,43 +622,26 @@
                 intersectionClusterGroup.getLayers().forEach(marker => { L.marker(marker.getLatLng(), { icon: marker.options.icon }).bindPopup(marker.getPopup().getContent()).addTo(overlayLayersGroup); });
             }
             customPointsLayer.getLayers().forEach(marker => {
-                const newMarker = L.marker(marker.getLatLng(), { icon: marker.options.icon }).addTo(overlayLayersGroup);
-                if (marker.customName) { newMarker.bindPopup(getPopupContent({_leaflet_id: 'clone', customName: marker.customName, getLatLng: marker.getLatLng})); }
+                L.marker(marker.getLatLng(), { icon: marker.options.icon }).bindPopup(marker.getPopup().getContent()).addTo(overlayLayersGroup);
+            });
+            drawingsLayer.getLayers().forEach(layer => {
+                if (layer.getLatLngs) { // Polylines
+                    L.polyline(layer.getLatLngs(), layer.options).addTo(overlayLayersGroup);
+                } else if (layer.getLatLng) { // Markers
+                    L.marker(layer.getLatLng(), layer.options).addTo(overlayLayersGroup);
+                }
             });
         }
 
-        // --- Добавление пользовательских точек ---
-        function enterPointPlacementMode() {
-            document.getElementById('map').classList.add('map-placement-mode');
-            map.once('click', (e) => { createCustomPoint(e.latlng); document.getElementById('map').classList.remove('map-placement-mode'); });
-        }
-        function createCustomPoint(latlng, initialName = '') {
-            const marker = L.marker(latlng, { draggable: true, icon: L.divIcon({ className: 'fa-solid fa-map-pin', iconSize: [24, 24], html: `<i class="fa-solid fa-map-pin" style="font-size: 24px; color: var(--accent-color); text-shadow: 0 0 3px rgba(0,0,0,0.5);"></i>` }) }).addTo(customPointsLayer);
-            marker.customName = initialName;
-            marker.bindPopup(getPopupContent(marker)).openPopup();
-        }
-        function getPopupContent(marker) {
-            const markerId = marker._leaflet_id;
-            if (marker.customName) { return `<div class="custom-point-popup"><p>${marker.customName}</p><small>${marker.getLatLng().lat.toFixed(4)}, ${marker.getLatLng().lng.toFixed(4)}</small></div>`; }
-            else { return `<div class="custom-point-popup"><input type="text" id="input-${markerId}" placeholder="Назва точки"><button id="btn-${markerId}">Зберегти</button></div>`; }
-        }
-        map.on('popupopen', function(e) {
-            const marker = e.popup._source; if (!customPointsLayer.hasLayer(marker)) return;
-            const markerId = marker._leaflet_id; const btn = document.getElementById(`btn-${markerId}`);
-            if (btn) {
-                btn.onclick = () => {
-                    const input = document.getElementById(`input-${markerId}`);
-                    marker.customName = input.value || "Без назви";
-                    marker.setPopupContent(getPopupContent(marker));
-                };
-            }
-        });
 
-        // --- Работа с Google Sheets ---
-        document.getElementById('sync-button').addEventListener('click', () => fetchDataFromSheet(false)); // false = не тихий режим
+        // --- 📄 ЛОГІКА РОБОТИ З ДАНИМИ (GOOGLE SHEETS, ФАЙЛИ) ---
+
+        document.getElementById('sync-button').addEventListener('click', () => fetchDataFromSheet(false));
+        document.getElementById('upload-button').addEventListener('click', () => logFileInput.click());
+        logFileInput.addEventListener('change', handleFileSelect);
 
         async function fetchDataFromSheet(isSilent = false) {
-            if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+            if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes('YOUR_GOOGLE_APPS_SCRIPT_URL')) {
                 if (!isSilent) alert('Помилка: URL Google Apps Script не вказано в коді.');
                 return;
             }
@@ -305,7 +654,7 @@
                 
                 if (isSilent) {
                     const newRowCount = sheetData.length;
-                    const newEventsCount = newRowCount - lastSyncRowCount;
+                    const newEventsCount = newRowCount - (lastSyncRowCount || 0);
                     const syncBadge = document.getElementById('sync-badge');
                     if (newEventsCount > 0) {
                         syncBadge.textContent = newEventsCount;
@@ -319,19 +668,25 @@
                 lastSyncRowCount = sheetData.length;
                 document.getElementById('sync-badge').style.display = 'none';
 
-                const formattedData = sheetData.map((row, index) => {
-                    return {
-                        name: row.Event, timestamp: row.Timestamp, azimuth: row.Azimuth,
-                        distance: row.Distance ? parseInt(row.Distance, 10) : null,
-                        comment: row.Comment, uniqueId: row.UniqueID || `sheet_${index}`,
-                        originCoordinates: { lat: parseFloat(row.Latitude), lon: parseFloat(row.Longitude) },
-                        fileName: `Sheet: ${row.Shift} | ${row.Position}`,
-                        fileColor: generateHslColor(index, sheetData.length)
-                    };
-                });
+                const formattedData = sheetData.map((row, index) => ({
+                    name: row.Event, timestamp: row.Timestamp, azimuth: row.Azimuth,
+                    distance: row.Distance ? parseInt(row.Distance, 10) : null,
+                    comment: row.Comment, uniqueId: row.UniqueID || `sheet_${index}`,
+                    originCoordinates: { lat: parseFloat(row.Latitude), lon: parseFloat(row.Longitude) },
+                    fileName: `Sheet: ${row.Shift} | ${row.Position}`,
+                    fileColor: generateHslColor(index, sheetData.length)
+                }));
                 
-                allLogsData = formattedData;
-                initCalendar(); updateMap(); displayEventsList(allLogsData, null);
+                const validData = formattedData.filter(log => !isNaN(log.originCoordinates.lat) && !isNaN(log.originCoordinates.lon));
+
+                if (validData.length < formattedData.length && !isSilent) {
+                    alert(`Попередження: ${formattedData.length - validData.length} записів з таблиці було проігноровано через невірні координати.`);
+                }
+                
+                allLogsData = validData;
+                initCalendar(); 
+                updateMap(); 
+                displayEventsList(allLogsData, null);
                 
             } catch (error) {
                 if (!isSilent) alert('Не вдалося завантажити дані з Google Sheet.');
@@ -340,13 +695,12 @@
                 if (!isSilent) loader.style.display = 'none';
             }
         }
-        
-        // --- Загрузка и обработка файлов ---
+
         function handleFileSelect(event) {
             loader.style.display = 'flex';
             if (mapLayersControl) { map.removeControl(mapLayersControl); mapLayersControl = null; }
             Object.values(fileLayerGroups).forEach(group => group.clearLayers());
-            if (intersectionClusterGroup) intersectionClusterGroup.clearLayers();
+            if (intersectionClusterGroup) { intersectionClusterGroup.clearLayers(); map.removeLayer(intersectionClusterGroup); }
             allLogsData = []; fileLayerGroups = {}; mapFeatures = {};
             let logIdCounter = 0;
             const files = Array.from(event.target.files);
@@ -354,7 +708,8 @@
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     try {
-                        const data = JSON.parse(e.target.result); let processedLogs = [];
+                        const data = JSON.parse(e.target.result);
+                        let processedLogs = [];
                         if (data.events && data.position && data.position.location) {
                             const originCoordinates = { lat: data.position.location.lat, lon: data.position.location.lon };
                             data.events.forEach(event => { processedLogs.push({ ...event, distance: event.distance ? parseInt(event.distance, 10) : null, uniqueId: `log_${logIdCounter++}`, originCoordinates: originCoordinates, fileName: file.name, fileColor: generateHslColor(index, files.length) }); });
@@ -362,69 +717,151 @@
                             data.logs.forEach(log => { log.uniqueId = `log_${logIdCounter++}`; log.originCoordinates = data.originCoordinates; log.fileName = file.name; log.fileColor = generateHslColor(index, files.length); processedLogs.push(log); });
                         } else { alert(`Файл ${file.name} має невідомий формат.`); }
                         allLogsData.push(...processedLogs);
-                    } catch (error) { alert(`Помилка парсингу файлу ${file.name}.`); console.error(`Ошибка парсинга ${file.name}:`, error); }
+                    } catch (error) { alert(`Помилка парсингу файлу ${file.name}.`); }
                     resolve();
                 };
                 reader.readAsText(file);
             }));
             Promise.all(promises).then(() => {
                 initCalendar(); updateMap(); displayEventsList(allLogsData, null);
-                document.getElementById('top-panel').classList.remove('collapsed');
+                topPanel.classList.remove('collapsed');
                 loader.style.display = 'none';
             });
         }
-        
-        // --- Обновление карты ---
+
+        // --- 🗺️ ЛОГІКА ВІДОБРАЖЕННЯ ДАНИХ НА КАРТІ ТА В ПАНЕЛІ ---
+
         function updateMap() {
             if (mapLayersControl) { map.removeControl(mapLayersControl); mapLayersControl = null; }
-            Object.values(fileLayerGroups).forEach(group => group.clearLayers());
-            if (intersectionClusterGroup) { intersectionClusterGroup.clearLayers(); map.removeLayer(intersectionClusterGroup); }
+            Object.values(fileLayerGroups).forEach(group => { if(map.hasLayer(group)) map.removeLayer(group); });
+            if (intersectionClusterGroup) { intersectionClusterGroup.clearLayers(); if(map.hasLayer(intersectionClusterGroup)) map.removeLayer(intersectionClusterGroup); }
             fileLayerGroups = {}; mapFeatures = {};
             let filteredLogs = allLogsData.filter(log => !selectedCalendarDate || log.timestamp.startsWith(selectedCalendarDate));
             drawLogVisuals(filteredLogs);
             calculateAndDrawIntersections(filterForIntersection(filteredLogs));
         }
-        
-        // --- Календарь и Список событий ---
+
+        function drawLogVisuals(logsToDraw) {
+            const overlayMaps = {};
+            const logsByFile = logsToDraw.reduce((acc, log) => {
+                if (!acc[log.fileName]) acc[log.fileName] = [];
+                acc[log.fileName].push(log);
+                return acc;
+            }, {});
+
+            for (const fileName in logsByFile) {
+                const logs = logsByFile[fileName];
+                if (logs.length === 0) continue;
+                const fileColor = logs[0].fileColor;
+                const fileGroup = L.layerGroup();
+                const originsDrawn = new Set();
+                logs.forEach(log => {
+                    const origin = log.originCoordinates;
+                    const originKey = `${origin.lat},${origin.lon}`;
+                    if (!originsDrawn.has(originKey)) {
+                        L.marker([origin.lat, origin.lon], { icon: L.divIcon({ className: 'fa-solid fa-user-secret', iconSize: [20, 20], html: `<i class="fa-solid fa-user-secret" style="color: ${fileColor}; font-size: 20px;"></i>` }) }).addTo(fileGroup).bindPopup(`<b>Спостерігач</b><br>${fileName}`);
+                        originsDrawn.add(originKey);
+                    }
+                    if (log.azimuth && log.distance) drawObservation(log, fileGroup);
+                });
+                fileLayerGroups[fileName] = fileGroup;
+                overlayMaps[`<span class="layer-legend-color" style="background-color:${fileColor};"></span> ${fileName.substring(0, 25)}...`] = fileGroup;
+            }
+
+            if (intersectionClusterGroup && intersectionClusterGroup.getLayers().length > 0) {
+                overlayMaps[`<i class="fa-solid fa-crosshairs" style="color:#d92f2f;"></i> Перетини`] = intersectionClusterGroup;
+            }
+            overlayMaps[`<i class="fa-solid fa-map-pin" style="color:var(--accent-color);"></i> Мої точки`] = customPointsLayer;
+            overlayMaps[`<i class="fa-solid fa-pencil" style="color:#f5a623;"></i> Малюнки`] = drawingsLayer;
+
+            mapLayersControl = L.control.layers(baseLayers, overlayMaps, { collapsed: false });
+            mapLayersControl.addTo(map);
+            const layersContainer = document.getElementById('layers-container');
+            layersContainer.innerHTML = '';
+            layersContainer.appendChild(mapLayersControl.getContainer());
+            
+            Object.values(fileLayerGroups).forEach(group => map.addLayer(group));
+            if (intersectionClusterGroup) map.addLayer(intersectionClusterGroup);
+        }
+
+        function drawObservation(log, layerGroup, isOverlay = false) {
+            const originPoint = [log.originCoordinates.lat, log.originCoordinates.lon];
+            const averageAzimuth = (parseAzimuth(log.azimuth)[0] + parseAzimuth(log.azimuth)[1]) / 2;
+            const targetPoint = getDestPoint(originPoint[0], originPoint[1], averageAzimuth, log.distance);
+            
+            const polyline = L.polyline([originPoint, targetPoint], { color: log.fileColor, weight: 3, opacity: 0.9 }).addTo(layerGroup);
+            const marker = L.circle(targetPoint, { color: log.fileColor, fillColor: log.fileColor, fillOpacity: 0.4, radius: 25 }).addTo(layerGroup);
+
+            if (!isOverlay) {
+                marker.on('click', () => openEventModal(log, targetPoint));
+                mapFeatures[log.uniqueId] = { marker, polyline };
+            }
+        }
+
+        function calculateAndDrawIntersections(logs) {
+            intersectionClusterGroup = L.markerClusterGroup();
+            for (let i = 0; i < logs.length; i++) {
+                for (let j = i + 1; j < logs.length; j++) {
+                    const logA = logs[i], logB = logs[j];
+                    if (logA.fileName === logB.fileName) continue;
+                    const iPoint = findIntersection(logA, logB);
+                    if (iPoint) {
+                        const distA = calculateDistance(logA.originCoordinates.lat, logA.originCoordinates.lon, iPoint[0], iPoint[1]);
+                        const distB = calculateDistance(logB.originCoordinates.lat, logB.originCoordinates.lon, iPoint[0], iPoint[1]);
+                        const popup = `<b>Перетин</b><br><b>Коорд:</b> ${iPoint[0].toFixed(5)}, ${iPoint[1].toFixed(5)}<hr><b>Файл 1:</b> ${logA.fileName}<br><b>Дист:</b> ${Math.round(distA)} м<br><hr><b>Файл 2:</b> ${logB.fileName}<br><b>Дист:</b> ${Math.round(distB)} м`;
+                        const marker = L.marker(iPoint, { icon: L.divIcon({ className: 'fa-solid fa-crosshairs intersection-icon', iconSize: [24, 24] }) }).bindPopup(popup);
+                        intersectionClusterGroup.addLayer(marker);
+                    }
+                }
+            }
+        }
+
         function initCalendar() {
             const eventDates = [...new Set(allLogsData.map(log => log.timestamp.substring(0, 10)))];
             const options = {
-                actions: { clickDay(e, self) {
-                    selectedCalendarDate = self.selectedDates[0] || null;
-                    const eventsForDate = selectedCalendarDate ? allLogsData.filter(log => log.timestamp.startsWith(selectedCalendarDate)) : allLogsData;
-                    displayEventsList(eventsForDate, selectedCalendarDate);
-                    updateMap();
-                }},
+                actions: {
+                    clickDay(e, self) {
+                        selectedCalendarDate = self.selectedDates[0] || null;
+                        const eventsForDate = selectedCalendarDate ? allLogsData.filter(log => log.timestamp.startsWith(selectedCalendarDate)) : allLogsData;
+                        displayEventsList(eventsForDate, selectedCalendarDate);
+                        updateMap();
+                    }
+                },
                 settings: { visibility: { highlighted: eventDates } },
             };
             if (calendar) calendar.destroy();
-            calendar = new VanillaCalendar('#calendar-container', options);
-            calendar.init();
+            const calendarContainer = document.getElementById('calendar-container');
+            if(calendarContainer) {
+                calendar = new VanillaCalendar(calendarContainer, options);
+                calendar.init();
+            }
         }
+
         function displayEventsList(events, date) {
-            const list = document.getElementById('events-list'); list.innerHTML = '';
+            const list = document.getElementById('events-list');
+            list.innerHTML = '';
             document.getElementById('events-list-title').textContent = date ? `Події за ${date}` : 'Всі події';
-            if (events.length === 0) { list.innerHTML = '<li>Немає подій.</li>'; return; }
+            if (events.length === 0) {
+                list.innerHTML = '<li>Немає подій.</li>';
+                return;
+            }
             events.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
             events.forEach(log => {
                 const time = new Date(log.timestamp).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
-                const li = document.createElement('li'); li.dataset.logId = log.uniqueId;
+                const li = document.createElement('li');
+                li.dataset.logId = log.uniqueId;
                 li.innerHTML = `<span class="layer-legend-color" style="background-color: ${log.fileColor};"></span><span><b>${log.name || 'Без назви'}</b> (${log.distance || 'N/A'}m) <small style="opacity:0.7;">- ${time}</small></span>`;
                 list.appendChild(li);
             });
         }
 
-        // --- Интерактивность списка и карты ---
         const eventsListElement = document.getElementById('events-list');
         eventsListElement.addEventListener('mouseover', (e) => {
             const li = e.target.closest('li'); if (!li || !li.dataset.logId) return;
-            document.querySelectorAll('#events-list li').forEach(el => el.classList.remove('highlighted'));
-            li.classList.add('highlighted');
             const feature = mapFeatures[li.dataset.logId];
             if (feature && feature.polyline) { feature.polyline.setStyle({ weight: 7 }); }
         });
-        eventsListElement.addEventListener('mouseout', (e) => {
-            document.querySelectorAll('#events-list li').forEach(el => el.classList.remove('highlighted'));
+        eventsListElement.addEventListener('mouseout', () => {
             Object.values(mapFeatures).forEach(feature => {
                 if (feature.polyline) { feature.polyline.setStyle({ weight: 3 }); }
             });
@@ -434,76 +871,318 @@
             const feature = mapFeatures[li.dataset.logId];
             if (feature && feature.marker) { map.flyTo(feature.marker.getLatLng(), 15); feature.marker.openPopup(); }
         });
-        
-        function drawLogVisuals(logsToDraw) {
-            const overlayMaps = {}; const logsByFile = logsToDraw.reduce((acc, log) => { if (!acc[log.fileName]) acc[log.fileName] = []; acc[log.fileName].push(log); return acc; }, {});
-            for (const fileName in logsByFile) {
-                const logs = logsByFile[fileName]; if (logs.length === 0) continue;
-                const fileColor = logs[0].fileColor; const fileGroup = L.layerGroup(); const originsDrawn = new Set();
-                logs.forEach(log => {
-                    const origin = log.originCoordinates; if (!originsDrawn.has(`${origin.lat},${origin.lon}`)) {
-                        L.marker([origin.lat, origin.lon], { icon: L.divIcon({ className: 'fa-solid fa-user-secret', iconSize: [20, 20], html: `<i class="fa-solid fa-user-secret" style="color: ${fileColor}; font-size: 20px;"></i>` }) }).addTo(fileGroup).bindPopup(`<b>Спостерігач</b><br>${fileName}`);
-                        originsDrawn.add(`${origin.lat},${origin.lon}`);
-                    }
-                    if (log.azimuth && log.distance) drawObservation(log, fileGroup);
-                });
-                fileLayerGroups[fileName] = fileGroup; overlayMaps[`<span class="layer-legend-color" style="background-color:${fileColor};"></span> ${fileName.substring(0, 25)}...`] = fileGroup;
-            }
-            if (intersectionClusterGroup && intersectionClusterGroup.getLayers().length > 0) { overlayMaps[`<i class="fa-solid fa-crosshairs" style="color:#d92f2f;"></i> Перетини`] = intersectionClusterGroup; }
-            overlayMaps[`<i class="fa-solid fa-map-pin" style="color:var(--accent-color);"></i> Мої точки`] = customPointsLayer;
-            mapLayersControl = L.control.layers(baseLayers, overlayMaps, { collapsed: false });
-            mapLayersControl.addTo(map);
-            document.getElementById('layers-container').appendChild(mapLayersControl.getContainer());
-            Object.values(fileLayerGroups).forEach(group => map.addLayer(group));
-            if (intersectionClusterGroup) map.addLayer(intersectionClusterGroup);
-        }
-        
-        function drawObservation(log, layerGroup, isOverlay = false) {
-            const originPoint = [log.originCoordinates.lat, log.originCoordinates.lon];
-            const averageAzimuth = (parseAzimuth(log.azimuth)[0] + parseAzimuth(log.azimuth)[1]) / 2;
-            const targetPoint = getDestPoint(originPoint[0], originPoint[1], averageAzimuth, log.distance);
-            const polyline = L.polyline([originPoint, targetPoint], { color: log.fileColor, weight: 3, opacity: 0.9 }).addTo(layerGroup);
-            const marker = L.circle(targetPoint, { color: log.fileColor, fillColor: log.fileColor, fillOpacity: 0.4, radius: 25 }).addTo(layerGroup);
-            if (!isOverlay) {
-                marker.bindPopup(`<b>${log.name}</b><br><b>Дист:</b> ${log.distance} м`);
-                mapFeatures[log.uniqueId] = { marker, polyline };
-            }
-        }
-        
-        function filterForIntersection(logs) { return logs.filter(log => { if (!log.name || !log.azimuth || !log.distance) return false; const [startAz, endAz] = parseAzimuth(log.azimuth); return (endAz - startAz) <= 10; }); }
-        function calculateAndDrawIntersections(logs) {
-            intersectionClusterGroup = L.markerClusterGroup();
-            for (let i = 0; i < logs.length; i++) { for (let j = i + 1; j < logs.length; j++) {
-                const logA = logs[i], logB = logs[j]; if (logA.originCoordinates.lat === logB.originCoordinates.lat && logA.originCoordinates.lon === logB.originCoordinates.lon) continue;
-                const iPoint = findIntersection(logA, logB);
-                if (iPoint) {
-                    const distA = calculateDistance(logA.originCoordinates.lat, logA.originCoordinates.lon, iPoint[0], iPoint[1]); const distB = calculateDistance(logB.originCoordinates.lat, logB.originCoordinates.lon, iPoint[0], iPoint[1]);
-                    const popup = `<b>Перетин</b><br><b>Коорд:</b> ${iPoint[0].toFixed(5)}, ${iPoint[1].toFixed(5)}<hr><b>Файл 1:</b> ${logA.fileName}<br><b>Дист:</b> ${Math.round(distA)} м<br><hr><b>Файл 2:</b> ${logB.fileName}<br><b>Дист:</b> ${Math.round(distB)} м`;
-                    const marker = L.marker(iPoint, { icon: L.divIcon({ className: 'fa-solid fa-crosshairs intersection-icon', iconSize: [24, 24] }) }).bindPopup(popup);
-                    marker.feature = { type: "Feature", geometry: { type: "Point", coordinates: [iPoint[1], iPoint[0]] }, properties: { file1: logA.fileName, dist1: Math.round(distA), file2: logB.fileName, dist2: Math.round(distB) } };
-                    intersectionClusterGroup.addLayer(marker);
-                }
-            }}
-        }
-        document.getElementById('export-button').addEventListener('click', () => {
-            const layersToExport = [ ...Object.values(fileLayerGroups).flatMap(lg => lg.getLayers()), ...(intersectionClusterGroup ? intersectionClusterGroup.getLayers() : []), ...customPointsLayer.getLayers() ];
-            if (layersToExport.length === 0) { return alert("Немає даних для експорту."); }
-            const featureGroup = L.featureGroup(layersToExport); const geoJson = featureGroup.toGeoJSON();
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(geoJson, null, 2)); const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", "map_data.geojson"); document.body.appendChild(dl); dl.click(); dl.remove();
+
+        // --- 📌 ЛОГІКА "ДОДАТИ ВЛАСНУ ТОЧКУ" ---
+
+        const customPointModal = document.getElementById('custom-point-modal-overlay');
+        document.getElementById('add-point-button').addEventListener('click', () => customPointModal.classList.add('visible'));
+        document.getElementById('custom-point-modal-close-button').addEventListener('click', () => customPointModal.classList.remove('visible'));
+        customPointModal.addEventListener('click', (e) => { if (e.target === customPointModal) customPointModal.classList.remove('visible'); });
+
+        document.querySelectorAll('input[name="point-icon-source"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                const selected = document.querySelector('input[name="point-icon-source"]:checked').value;
+                document.getElementById('point-url-source-group').style.display = selected === 'url' ? 'block' : 'none';
+                document.getElementById('point-file-source-group').style.display = selected === 'file' ? 'block' : 'none';
+            });
         });
+
+        document.querySelectorAll('input[name="icon-background-processing"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                const selected = document.querySelector('input[name="icon-background-processing"]:checked').value;
+                document.getElementById('circle-bg-color-group').style.display = selected === 'circle-bg' ? 'block' : 'none';
+            });
+        });
+
+        document.getElementById('place-point-submit').addEventListener('click', () => {
+            const name = document.getElementById('point-name-input').value.trim() || "Без назви";
+            const sourceType = document.querySelector('input[name="point-icon-source"]:checked').value;
+            const backgroundProcessingType = document.querySelector('input[name="icon-background-processing"]:checked').value;
+            const circleBgColor = document.getElementById('circle-bg-color-picker').value;
+            
+            let iconUrlPromise;
+
+            switch (sourceType) {
+                case 'url':
+                    const url = document.getElementById('point-url-input').value.trim();
+                    if (!url) { alert('Вставте посилання на іконку.'); return; }
+                    iconUrlPromise = Promise.resolve(url);
+                    break;
+                case 'file':
+                    const file = document.getElementById('point-file-input').files[0];
+                    if (!file) { alert('Оберіть файл іконки.'); return; }
+                    iconUrlPromise = new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = e => resolve(e.target.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                    });
+                    break;
+                default:
+                    const defaultIcon = L.divIcon({
+                        className: 'fa-solid fa-map-pin',
+                        iconSize: [24, 24],
+                        html: `<i class="fa-solid fa-map-pin" style="font-size: 24px; color: var(--accent-color); text-shadow: 0 0 3px rgba(0,0,0,0.5);"></i>`
+                    });
+                    startMarkerPlacement(name, defaultIcon);
+                    return;
+            }
+
+            iconUrlPromise.then(url => {
+                return processImageForIcon(url, backgroundProcessingType, circleBgColor);
+            }).then(processedDataUrl => {
+                const finalIcon = L.icon({
+                    iconUrl: processedDataUrl,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 32],
+                    popupAnchor: [0, -32]
+                });
+                startMarkerPlacement(name, finalIcon);
+            }).catch(err => {
+                console.error("Помилка створення або обробки іконки:", err);
+                alert("Не вдалося завантажити або обробити іконку.");
+            });
+        });
+
+        function processImageForIcon(imageUrl, processingType, bgColor) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'Anonymous';
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                    const size = 32;
+                    canvas.width = size;
+                    canvas.height = size;
+
+                    if (processingType === 'circle-bg') {
+                        ctx.beginPath();
+                        ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+                        ctx.fillStyle = bgColor;
+                        ctx.fill();
+                        ctx.clip();
+                    }
+
+                    ctx.drawImage(img, 0, 0, size, size);
+
+                    if (processingType === 'white-to-transparent') {
+                        const imageData = ctx.getImageData(0, 0, size, size);
+                        const pixels = imageData.data;
+                        for (let i = 0; i < pixels.length; i += 4) {
+                            if (pixels[i] > 240 && pixels[i + 1] > 240 && pixels[i + 2] > 240) {
+                                pixels[i + 3] = 0;
+                            }
+                        }
+                        ctx.putImageData(imageData, 0, 0);
+                    }
+                    resolve(canvas.toDataURL());
+                };
+                img.onerror = reject;
+                img.src = imageUrl;
+            });
+        }
+
+        function startMarkerPlacement(name, icon, latlng = null) {
+            const placeMarker = (pos) => {
+                const marker = L.marker(pos, { icon: icon, draggable: true }).addTo(customPointsLayer);
+                const timestamp = new Date();
+                const popupContent = `<b>${name}</b><hr style="margin: 5px 0;"><b>Координати:</b><br>${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)}<br><b>Дата:</b> ${timestamp.toLocaleDateString('uk-UA')}<br><b>Час:</b> ${timestamp.toLocaleTimeString('uk-UA')}`;
+                marker.bindPopup(popupContent).openPopup();
+                
+                document.getElementById('point-name-input').value = '';
+                document.getElementById('point-url-input').value = '';
+                document.getElementById('point-file-input').value = null;
+                document.querySelector('input[name="point-icon-source"][value="default"]').checked = true;
+                document.querySelector('input[name="icon-background-processing"][value="none"]').checked = true;
+                document.getElementById('point-url-source-group').style.display = 'none';
+                document.getElementById('point-file-source-group').style.display = 'none';
+                document.getElementById('circle-bg-color-group').style.display = 'none';
+                document.getElementById('map').classList.remove('map-placement-mode');
+            };
+
+            customPointModal.classList.remove('visible');
+            if (latlng) {
+                placeMarker(latlng);
+            } else {
+                document.getElementById('map').classList.add('map-placement-mode');
+                map.once('click', (e) => placeMarker(e.latlng));
+            }
+        }
+
+        // --- 🎨 ЛОГІКА "ІНСТРУМЕНТИ МАЛЮВАННЯ" ---
+
+        const drawingModalOverlay = document.getElementById('drawing-modal-overlay');
+        document.getElementById('draw-button').addEventListener('click', () => drawingModalOverlay.classList.add('visible'));
+        document.getElementById('drawing-modal-close-button').addEventListener('click', () => drawingModalOverlay.classList.remove('visible'));
+        drawingModalOverlay.addEventListener('click', (e) => { if (e.target === drawingModalOverlay) drawingModalOverlay.classList.remove('visible'); });
+
+        document.getElementById('drawing-options').addEventListener('click', (e) => {
+            const button = e.target.closest('.draw-option-button');
+            if (!button) return;
+            const drawType = button.dataset.drawType;
+            drawingModalOverlay.classList.remove('visible');
+            if (drawType === 'flexible-line') {
+                initiateFlexibleDrawing(drawType);
+            } else {
+                initiateStandardDrawing(drawType);
+            }
+        });
+
+        function initiateStandardDrawing(drawType) {
+            document.getElementById('map').classList.add('map-placement-mode');
+            map.once('click', (e1) => {
+                const startPoint = e1.latlng;
+                const startMarker = L.circleMarker(startPoint, { color: 'var(--accent-color)', radius: 5, weight: 2 }).addTo(map);
+                map.once('click', (e2) => {
+                    const endPoint = e2.latlng;
+                    drawDecoratedPolyline([startPoint, endPoint], drawType);
+                    document.getElementById('map').classList.remove('map-placement-mode');
+                    map.removeLayer(startMarker);
+                });
+            });
+        }
+
+        function initiateFlexibleDrawing(drawType) {
+            document.getElementById('map').classList.add('map-placement-mode');
+            const points = [];
+            const tempMarkers = L.layerGroup().addTo(map);
+            map.once('click', (e1) => {
+                points.push(e1.latlng);
+                tempMarkers.addLayer(L.circleMarker(e1.latlng, { color: 'var(--accent-color)', radius: 5, weight: 2 }));
+                map.once('click', (e2) => {
+                    points.push(e2.latlng);
+                    tempMarkers.addLayer(L.circleMarker(e2.latlng, { color: 'var(--accent-color)', radius: 5, weight: 2 }));
+                    map.once('click', (e3) => {
+                        points.push(e3.latlng);
+                        drawDecoratedPolyline(points, drawType);
+                        document.getElementById('map').classList.remove('map-placement-mode');
+                        tempMarkers.clearLayers();
+                    });
+                });
+            });
+        }
+
+        function drawDecoratedPolyline(latlngs, type) {
+            const selectedColor = document.getElementById('drawing-color-picker').value;
+            const polyline = L.polyline(latlngs, { color: selectedColor, weight: 3 }).addTo(drawingsLayer);
+
+            switch (type) {
+                case 'arrow':
+                    L.polylineDecorator(polyline, { patterns: [{ offset: '100%', symbol: L.Symbol.arrowHead({ pixelSize: 15, pathOptions: { stroke: true, color: selectedColor } }) }] }).addTo(drawingsLayer);
+                    break;
+                case 'repeating-arrow':
+                    L.polylineDecorator(polyline, { patterns: [{ repeat: 80, symbol: L.Symbol.arrowHead({ pixelSize: 12, pathOptions: { color: selectedColor, fillOpacity: 1, weight: 0 }}) }] }).addTo(drawingsLayer);
+                    break;
+                case 'animated-arrow':
+                    const animatedArrowDecorator = L.polylineDecorator(polyline, { patterns: [{ offset: 0, repeat: 150, symbol: L.Symbol.arrowHead({ pixelSize: 12, pathOptions: { color: selectedColor, fillOpacity: 1, weight: 0 }}) }] }).addTo(drawingsLayer);
+                    let arrowOffset = 0;
+                    setInterval(() => {
+                        arrowOffset = (arrowOffset + 1) % 150;
+                        animatedArrowDecorator.setPatterns([{ offset: arrowOffset, repeat: 150, symbol: L.Symbol.arrowHead({ pixelSize: 12, pathOptions: { color: selectedColor, fillOpacity: 1, weight: 0 }}) }]);
+                    }, 80);
+                    break;
+                case 'dashed-line':
+                    polyline.setStyle({ dashArray: '10, 10' });
+                    break;
+                case 'animated-ants':
+                    polyline.setStyle({ opacity: 0.5 });
+                    const decorator = L.polylineDecorator(polyline, { patterns: [{ offset: 0, repeat: '20px', symbol: L.Symbol.dash({ pixelSize: 10, pathOptions: { color: 'white', weight: 2, opacity: 0.9 }}) }] }).addTo(drawingsLayer);
+                    let offset = 0;
+                    setInterval(() => {
+                        offset = (offset + 1) % 20;
+                        decorator.setPatterns([{ offset: offset, repeat: '20px', symbol: L.Symbol.dash({ pixelSize: 10, pathOptions: { color: 'white', weight: 2, opacity: 0.9 }}) }]);
+                    }, 100);
+                    break;
+                case 'icon-line':
+                    const customIcon = L.icon({ iconUrl: 'https://img.icons8.com/color/48/marker.png', iconSize: [32, 32], iconAnchor: [16, 32] });
+                    L.polylineDecorator(polyline, { patterns: [{ repeat: 150, symbol: L.Symbol.marker({ markerOptions: { icon: customIcon } }) }] }).addTo(drawingsLayer);
+                    break;
+            }
+        }
+
+        // --- 💬 ЛОГІКА ДЕТАЛЕЙ ПОДІЇ (З ЛОГІВ) ---
+        const eventModalOverlay = document.getElementById('event-modal-overlay');
+        let currentModalLog = null;
+
+        function openEventModal(log, coordinates) {
+            currentModalLog = { log: log, coordinates: coordinates };
+            document.getElementById('modal-title').textContent = log.name || 'Деталі події';
+            document.getElementById('modal-coords').textContent = `${coordinates[0].toFixed(5)}, ${coordinates[1].toFixed(5)}`;
+            const eventDate = new Date(log.timestamp);
+            document.getElementById('modal-datetime').textContent = eventDate.toLocaleString('uk-UA', { dateStyle: 'medium', timeStyle: 'short' });
+            document.getElementById('modal-comment').textContent = log.comment || 'Немає';
+            eventModalOverlay.classList.add('visible');
+        }
+
+        function closeEventModal() {
+            eventModalOverlay.classList.remove('visible');
+            currentModalLog = null;
+            map.off('click');
+            document.getElementById('map').classList.remove('map-placement-mode');
+        }
+
+        document.getElementById('modal-close-button').addEventListener('click', closeEventModal);
+        eventModalOverlay.addEventListener('click', (e) => { if (e.target === eventModalOverlay) closeEventModal(); });
+
+        function startDrawingFromEvent(type) {
+            if (!currentModalLog) return;
+            closeEventModal();
+            document.getElementById('map').classList.add('map-placement-mode');
+            const startPoint = currentModalLog.coordinates;
+            map.once('click', (e) => {
+                const endPoint = e.latlng;
+                const latlngs = [startPoint, [endPoint.lat, endPoint.lng]];
+                const line = L.polyline(latlngs, { color: currentModalLog.log.fileColor || '#ff0000', weight: 3 }).addTo(drawingsLayer);
+                if (type === 'arrow') {
+                    L.polylineDecorator(line, { patterns: [{ offset: '100%', symbol: L.Symbol.arrowHead({ pixelSize: 15, pathOptions: { stroke: true, color: line.options.color } }) }] }).addTo(drawingsLayer);
+                } else {
+                    line.setStyle({ dashArray: '5, 10' });
+                }
+                document.getElementById('map').classList.remove('map-placement-mode');
+                currentModalLog = null;
+            });
+        }
+        document.getElementById('modal-draw-arrow').addEventListener('click', () => startDrawingFromEvent('arrow'));
+        document.getElementById('modal-draw-line').addEventListener('click', () => startDrawingFromEvent('line'));
+
+        // --- 🛠️ ДОПОМІЖНІ ФУНКЦІЇ ---
+        document.getElementById('gps-button').addEventListener('click', () => {
+            navigator.geolocation.getCurrentPosition(pos => {
+                map.flyTo([pos.coords.latitude, pos.coords.longitude], 13);
+            }, () => alert("Помилка GPS"));
+        });
+        
+        document.getElementById('export-button').addEventListener('click', () => {
+            const allFeatures = [
+                ...customPointsLayer.toGeoJSON().features,
+                ...drawingsLayer.toGeoJSON().features,
+                ...Object.values(fileLayerGroups).flatMap(lg => lg.toGeoJSON().features),
+                ...(intersectionClusterGroup ? intersectionClusterGroup.toGeoJSON().features : [])
+            ];
+            if(allFeatures.length === 0) return alert("Немає даних для експорту.");
+
+            const featureCollection = { type: "FeatureCollection", features: allFeatures };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(featureCollection, null, 2));
+            const dl = document.createElement('a');
+            dl.setAttribute("href", dataStr);
+            dl.setAttribute("download", `map_export_${new Date().toISOString().slice(0,10)}.geojson`);
+            document.body.appendChild(dl);
+            dl.click();
+            dl.remove();
+        });
+
+        function filterForIntersection(logs) { return logs.filter(log => log.name && log.azimuth && log.distance && (parseAzimuth(log.azimuth)[1] - parseAzimuth(log.azimuth)[0]) <= 10); }
         function generateHslColor(index, total) { const hue = (index * (360 / total)) % 360; return `hsl(${hue}, 70%, 50%)`; }
         function parseAzimuth(az) { if (typeof az === 'string' && az.includes('-')) return az.split('-').map(Number); return [Number(az), Number(az)]; }
         function getDestPoint(lat, lon, brng, dist) { const R = 6371e3; const l1 = lat * Math.PI / 180, n1 = lon * Math.PI / 180, b = brng * Math.PI / 180; const l2 = Math.asin(Math.sin(l1) * Math.cos(dist / R) + Math.cos(l1) * Math.sin(dist / R) * Math.cos(b)); const n2 = n1 + Math.atan2(Math.sin(b) * Math.sin(dist / R) * Math.cos(l1), Math.cos(dist / R) - Math.sin(l1) * Math.sin(l2)); return [l2 * 180 / Math.PI, n2 * 180 / Math.PI]; }
         function findIntersection(logA, logB) { const azA = (parseAzimuth(logA.azimuth)[0] + parseAzimuth(logA.azimuth)[1]) / 2; const azB = (parseAzimuth(logB.azimuth)[0] + parseAzimuth(logB.azimuth)[1]) / 2; const p1 = logA.originCoordinates, p3 = logB.originCoordinates; const p2 = getDestPoint(p1.lat, p1.lon, azA, 10000), p4 = getDestPoint(p3.lat, p3.lon, azB, 10000); const x1 = p1.lon, y1 = p1.lat, x2 = p2[1], y2 = p2[0], x3 = p3.lon, y3 = p3.lat, x4 = p4[1], y4 = p4[0]; const den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4); if (den === 0) return null; const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den; const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den; if (t > 0 && u > 0) return [y1 + t * (y2 - y1), x1 + t * (x2 - x1)]; return null; }
-        function calculateDistance(lat1, lon1, lat2, lon2) { const R = 6371e3; const p1 = lat1 * Math.PI / 180, p2 = lat2 * Math.PI / 180; const dP = (lat2 - lat1) * Math.PI / 180; const dL = (lon2 - lon1) * Math.PI / 180; const a = Math.sin(dP / 2) * Math.sin(dP / 2) + Math.cos(p1) * Math.cos(p2) * Math.sin(dL / 2) * Math.sin(dL / 2); const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); return R * c; }
+        function calculateDistance(lat1, lon1, lat2, lon2) { const R = 6371e3; const p1 = lat1 * Math.PI / 180, p2 = lat2 * Math.PI / 180; const dP = (lat2 - lat1) * Math.PI / 180, dL = (lon2 - lon1) * Math.PI / 180; const a = Math.sin(dP / 2) * Math.sin(dP / 2) + Math.cos(p1) * Math.cos(p2) * Math.sin(dL / 2) * Math.sin(dL / 2); const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); return R * c; }
 
-        // --- Запуск фоновой проверки ---
+        // --- 🚀 ЗАПУСК ДОДАТКУ ---
         window.addEventListener('load', () => {
-            fetchDataFromSheet();
-            setInterval(() => fetchDataFromSheet(true), 30000);
+            fetchDataFromSheet(); // Початкове завантаження
+            // setInterval(() => fetchDataFromSheet(true), 30000); // Фонова перевірка (вимкнено для тестування)
         });
-
     </script>
 </body>
 </html>
-
