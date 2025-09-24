@@ -44,8 +44,47 @@
         #events-column { flex: 1 1 40%; overflow-y: auto; }
         #layers-column { flex: 1 1 30%; }
 
-        #action-buttons { display: flex; gap: 15px; }
-        .action-button { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-color); padding: 5px; position: relative; }
+      /* --- СТИЛІ ДЛЯ ПАНЕЛІ ІНСТРУМЕНТІВ --- */
+#action-buttons {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1001; /* Поверх карти */
+    
+    display: flex;
+    flex-direction: column; /* Вертикальне розташування */
+    gap: 8px;
+    
+    background: var(--bg-color);
+    -webkit-backdrop-filter: var(--blur-effect);
+    backdrop-filter: var(--blur-effect);
+    
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 20px var(--shadow-color);
+}
+
+.action-button {
+    width: 40px;
+    height: 40px;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    font-size: 18px; /* Збільшимо іконки */
+    cursor: pointer;
+    color: var(--text-color);
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.action-button:hover {
+    background-color: var(--accent-color);
+    color: white;
+}
         
         #sync-badge {
             position: absolute;
@@ -467,3 +506,4 @@
     </script>
 </body>
 </html>
+
