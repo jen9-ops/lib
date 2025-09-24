@@ -337,24 +337,28 @@
     </style>
 </head>
 <body>
+    <body>
     <div id="map"></div>
-    
+
+    <div id="panel-toggle-container">
+        <button id="panel-toggle-button" title="Аналітична панель">
+            <i class="fa-solid fa-sliders"></i>
+        </button>
+    </div>
+
+    <div id="action-buttons">
+        <button id="sync-button" class="action-button" title="Синхронізувати з Google Sheet"><i class="fa-solid fa-sync"></i><span id="sync-badge"></span></button>
+        <button id="deepstate-button" class="action-button" title="Наложение на DeepState Map"><i class="fa-solid fa-layer-group"></i></button>
+        <button id="add-point-button" class="action-button" title="Додати власну точку"><i class="fa-solid fa-map-pin"></i></button>
+        <button id="draw-button" class="action-button" title="Інструменти малювання"><i class="fa-solid fa-pencil-ruler"></i></button>
+        <button id="gps-button" class="action-button" title="Знайти моє місцеположення"><i class="fa-solid fa-location-crosshairs"></i></button>
+        <button id="upload-button" class="action-button" title="Завантажити логи"><i class="fa-solid fa-upload"></i></button>
+        <button id="export-button" class="action-button" title="Експорт (GeoJSON)"><i class="fa-solid fa-file-export"></i></button>
+    </div>
+
     <div id="top-panel" class="collapsed">
-        <div class="panel-header" id="panel-header-toggle">
+        <div class="panel-header">
             <h2>Аналітична панель</h2>
-            <div id="action-buttons">
-                <button id="sync-button" class="action-button" title="Синхронізувати з Google Sheet">
-                    <i class="fa-solid fa-sync"></i>
-                    <span id="sync-badge"></span>
-                </button>
-                <button id="deepstate-button" class="action-button" title="Наложение на DeepState Map"><i class="fa-solid fa-layer-group"></i></button>
-                <button id="add-point-button" class="action-button" title="Додати власну точку"><i class="fa-solid fa-map-pin"></i></button>
-                <button id="draw-button" class="action-button" title="Інструменти малювання"><i class="fa-solid fa-pencil-ruler"></i></button>
-                <button id="gps-button" class="action-button" title="Знайти моє місцеположення"><i class="fa-solid fa-location-crosshairs"></i></button>
-                <button id="upload-button" class="action-button" title="Завантажити логи"><i class="fa-solid fa-upload"></i></button>
-                <button id="export-button" class="action-button" title="Експорт перетинів (GeoJSON)"><i class="fa-solid fa-file-export"></i></button>
-                <i class="fa-solid fa-chevron-down" id="panel-toggle-icon" style="margin-left: 20px;"></i>
-            </div>
         </div>
         <div class="panel-content">
             <div class="panel-column" id="calendar-column"><h3>Календар</h3><div id="calendar-container"></div></div>
@@ -375,109 +379,82 @@
     <div id="loader-overlay" class="hidden" style="display:none;"><div class="loader"></div></div>
 
     <div id="event-modal-overlay">
-    <div id="event-modal-content">
-        <button id="modal-close-button" class="modal-close">&times;</button>
-        <h3 id="modal-title">Деталі події</h3>
-        <div id="modal-info">
-            <p><strong>Координати:</strong> <span id="modal-coords"></span></p>
-            <p><strong>Час події:</strong> <span id="modal-datetime"></span></p>
-            <p><strong>Коментар:</strong> <span id="modal-comment"></span></p>
-        </div>
-        <div id="modal-actions">
-            <button id="modal-draw-arrow">Намалювати стрілку</button>
-            <button id="modal-draw-line">Намалювати лінію</button>
-        </div>
-    </div>
-</div>
-
-
-<div id="drawing-modal-overlay" class="event-modal-overlay-custom">
-  <div id="drawing-modal-content" class="event-modal-content-custom">
-    <button id="drawing-modal-close-button" class="modal-close-custom">&times;</button>
-    <h3>Інструменти малювання</h3>
-    <p style="text-align: center; margin-top: -10px; opacity: 0.7;">Оберіть інструмент, колір, а потім клацніть на карті для малювання.</p>
-    
-    <div class="color-picker-container">
-        <label for="drawing-color-picker">Колір:</label>
-        <input type="color" id="drawing-color-picker" value="#ff4747">
-    </div>
-
-    <div id="drawing-options">
-        <button class="draw-option-button" data-draw-type="arrow">
-            <i class="fa-solid fa-arrow-right"></i>
-            <span>Стрілка</span>
-        </button>
-        <button class="draw-option-button" data-draw-type="repeating-arrow">
-            <i class="fa-solid fa-angles-right"></i>
-            <span>Повтор. стрілки</span>
-        </button>
-        <button class="draw-option-button" data-draw-type="animated-arrow"> <i class="fa-solid fa-play"></i>
-            <span>Анімована стрілка</span>
-        </button>
-        <button class="draw-option-button" data-draw-type="flexible-line"> <i class="fa-solid fa-wave-square"></i>
-            <span>Вигнута лінія</span>
-        </button>
-        <button class="draw-option-button" data-draw-type="dashed-line">
-            <i class="fa-solid fa-grip-lines"></i>
-            <span>Пунктир</span>
-        </button>
-        <button class="draw-option-button" data-draw-type="animated-ants">
-            <i class="fa-solid fa-person-running"></i>
-            <span>Анімований пунктир</span>
-        </button>
-        <button class="draw-option-button" data-draw-type="icon-line"> <i class="fa-solid fa-location-dot"></i>
-            <span>Лінія з іконками</span>
-        </button>
-    </div>
-</div>
-</div>
-
-
-<div id="custom-point-modal-overlay" class="event-modal-overlay-custom">
-    <div id="custom-point-modal-content" class="event-modal-content-custom" style="max-width: 450px;">
-        <button id="custom-point-modal-close-button" class="modal-close-custom">&times;</button>
-        <h3>Параметри точки</h3>
-        
-        <div class="form-group">
-            <label for="point-name-input">Назва:</label>
-            <input type="text" id="point-name-input" placeholder="Наприклад, 'Позиція 1'">
-        </div>
-
-        <div class="form-group">
-            <label>Іконка:</label>
-            <div class="source-toggle">
-                <label><input type="radio" name="point-icon-source" value="default" checked> Стандартна</label>
-                <label><input type="radio" name="point-icon-source" value="url"> URL</label>
-                <label><input type="radio" name="point-icon-source" value="file"> Файл</label>
+        <div id="event-modal-content">
+            <button id="modal-close-button" class="modal-close">&times;</button>
+            <h3 id="modal-title">Деталі події</h3>
+            <div id="modal-info">
+                <p><strong>Координати:</strong> <span id="modal-coords"></span></p>
+                <p><strong>Час події:</strong> <span id="modal-datetime"></span></p>
+                <p><strong>Коментар:</strong> <span id="modal-comment"></span></p>
+            </div>
+            <div id="modal-actions">
+                <button id="modal-draw-arrow">Намалювати стрілку</button>
+                <button id="modal-draw-line">Намалювати лінію</button>
             </div>
         </div>
-
-        <div id="point-url-source-group" class="form-group" style="display: none;">
-            <label for="point-url-input">Посилання на іконку:</label>
-            <input type="text" id="point-url-input" placeholder="https://example.com/icon.png">
-        </div>
-
-        <div id="point-file-source-group" class="form-group" style="display: none;">
-            <label for="point-file-input">Завантажити файл (PNG, JPG, SVG):</label>
-            <input type="file" id="point-file-input" accept="image/*">
-        </div>
-
-        <div class="form-group">
-            <label>Обробка фону іконки:</label>
-            <div class="background-processing-toggle">
-                <label><input type="radio" name="icon-background-processing" value="none" checked> Без змін</label>
-                <label><input type="radio" name="icon-background-processing" value="circle-bg"> Круглий фон</label>
-                <label><input type="radio" name="icon-background-processing" value="white-to-transparent"> Білий в прозорий</label>
-            </div>
-            <div id="circle-bg-color-group" class="form-group" style="display: none; margin-top: 10px;">
-                <label for="circle-bg-color-picker">Колір фону:</label>
-                <input type="color" id="circle-bg-color-picker" value="#ffffff">
-            </div>
-        </div>
-        
-        <button id="place-point-submit">Розмістити на карті</button>
     </div>
-</div>
+
+    <div id="drawing-modal-overlay" class="event-modal-overlay-custom">
+        <div id="drawing-modal-content" class="event-modal-content-custom">
+            <button id="drawing-modal-close-button" class="modal-close-custom">&times;</button>
+            <h3>Інструменти малювання</h3>
+            <p style="text-align: center; margin-top: -10px; opacity: 0.7;">Оберіть інструмент, колір, а потім клацніть на карті для малювання.</p>
+            <div class="color-picker-container">
+                <label for="drawing-color-picker">Колір:</label>
+                <input type="color" id="drawing-color-picker" value="#ff4747">
+            </div>
+            <div id="drawing-options">
+                <button class="draw-option-button" data-draw-type="arrow"><i class="fa-solid fa-arrow-right"></i><span>Стрілка</span></button>
+                <button class="draw-option-button" data-draw-type="repeating-arrow"><i class="fa-solid fa-angles-right"></i><span>Повтор. стрілки</span></button>
+                <button class="draw-option-button" data-draw-type="animated-arrow"><i class="fa-solid fa-play"></i><span>Анімована стрілка</span></button>
+                <button class="draw-option-button" data-draw-type="flexible-line"><i class="fa-solid fa-wave-square"></i><span>Вигнута лінія</span></button>
+                <button class="draw-option-button" data-draw-type="dashed-line"><i class="fa-solid fa-grip-lines"></i><span>Пунктир</span></button>
+                <button class="draw-option-button" data-draw-type="animated-ants"><i class="fa-solid fa-person-running"></i><span>Анімований пунктир</span></button>
+                <button class="draw-option-button" data-draw-type="icon-line"><i class="fa-solid fa-location-dot"></i><span>Лінія з іконками</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom-point-modal-overlay" class="event-modal-overlay-custom">
+        <div id="custom-point-modal-content" class="event-modal-content-custom" style="max-width: 450px;">
+            <button id="custom-point-modal-close-button" class="modal-close-custom">&times;</button>
+            <h3>Параметри точки</h3>
+            <div class="form-group">
+                <label for="point-name-input">Назва:</label>
+                <input type="text" id="point-name-input" placeholder="Наприклад, 'Позиція 1'">
+            </div>
+            <div class="form-group">
+                <label>Іконка:</label>
+                <div class="source-toggle">
+                    <label><input type="radio" name="point-icon-source" value="default" checked> Стандартна</label>
+                    <label><input type="radio" name="point-icon-source" value="url"> URL</label>
+                    <label><input type="radio" name="point-icon-source" value="file"> Файл</label>
+                </div>
+            </div>
+            <div id="point-url-source-group" class="form-group" style="display: none;">
+                <label for="point-url-input">Посилання на іконку:</label>
+                <input type="text" id="point-url-input" placeholder="https://example.com/icon.png">
+            </div>
+            <div id="point-file-source-group" class="form-group" style="display: none;">
+                <label for="point-file-input">Завантажити файл (PNG, JPG, SVG):</label>
+                <input type="file" id="point-file-input" accept="image/*">
+            </div>
+            <div class="form-group">
+                <label>Обробка фону іконки:</label>
+                <div class="background-processing-toggle">
+                    <label><input type="radio" name="icon-background-processing" value="none" checked> Без змін</label>
+                    <label><input type="radio" name="icon-background-processing" value="circle-bg"> Круглий фон</label>
+                    <label><input type="radio" name="icon-background-processing" value="white-to-transparent"> Білий в прозорий</label>
+                </div>
+                <div id="circle-bg-color-group" class="form-group" style="display: none; margin-top: 10px;">
+                    <label for="circle-bg-color-picker">Колір фону:</label>
+                    <input type="color" id="circle-bg-color-picker" value="#ffffff">
+                </div>
+            </div>
+            <button id="place-point-submit">Розмістити на карті</button>
+        </div>
+    </div>
+</body>
     
     
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1258,6 +1235,7 @@ function startMarkerPlacement(name, icon) {
     </script>
 </body>
 </html>
+
 
 
 
