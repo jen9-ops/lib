@@ -81,14 +81,13 @@
             flex-direction: column; /* Вертикальне розташування */
             gap: 8px;
             
-            background: var(--bg-color);
-            -webkit-backdrop-filter: var(--blur-effect);
-            backdrop-filter: var(--blur-effect);
+       background: transparent; /* Убираем фон */
+    border: none; /* Можно убрать и рамку */
+    box-shadow: none; /* И тень */
+    backdrop-filter: none; /* Эффект размытия тоже лучше убрать */
             
             padding: 8px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 20px var(--shadow-color);
+            
         }
 
         .action-button {
