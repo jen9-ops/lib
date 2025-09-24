@@ -462,6 +462,19 @@
             <input type="file" id="point-file-input" accept="image/*">
         </div>
 
+        <div class="form-group">
+            <label>Обробка фону іконки:</label>
+            <div class="background-processing-toggle">
+                <label><input type="radio" name="icon-background-processing" value="none" checked> Без змін</label>
+                <label><input type="radio" name="icon-background-processing" value="circle-bg"> Круглий фон</label>
+                <label><input type="radio" name="icon-background-processing" value="white-to-transparent"> Білий в прозорий</label>
+            </div>
+            <div id="circle-bg-color-group" class="form-group" style="display: none; margin-top: 10px;">
+                <label for="circle-bg-color-picker">Колір фону:</label>
+                <input type="color" id="circle-bg-color-picker" value="#ffffff">
+            </div>
+        </div>
+        
         <button id="place-point-submit">Розмістити на карті</button>
     </div>
 </div>
@@ -648,7 +661,7 @@ function drawDecoratedPolyline(latlngs, type) {
                     offset: arrowOffset, repeat: 150,
                     symbol: L.Symbol.arrowHead({ pixelSize: 12, pathOptions: { color: selectedColor, fillOpacity: 1, weight: 0 }})
                 }]);
-            }, 50); // Швидкість анімації
+            }, 80); // Швидкість анімації
             break;
             
         case 'dashed-line':
@@ -1052,10 +1065,15 @@ function startDrawing(type) {
 
 // --- 🖋️ НОВА ЛОГІКА ДЛЯ КНОПКИ "ДОДАТИ ВЛАСНУ ТОЧКУ" ---
 
+// --- 🖋️ НОВА ЛОГІКА ДЛЯ КНОПКИ "ДОДАТИ ВЛАСНУ ТОЧКУ" ---
+
 const customPointModal = document.getElementById('custom-point-modal-overlay');
 const pointSourceRadios = document.querySelectorAll('input[name="point-icon-source"]');
 const pointUrlGroup = document.getElementById('point-url-source-group');
 const pointFileGroup = document.getElementById('point-file-source-group');
+const backgroundProcessingRadios = document.querySelectorAll('input[name="icon-background-processing"]');
+const circleBgColorGroup = document.getElementById('circle-bg-color-group');
+const circleBgColorPicker = document.getElementById('circle-bg-color-picker');
 
 // Закриття модального вікна
 document.getElementById('custom-point-modal-close-button').addEventListener('click', () => customPointModal.classList.remove('visible'));
@@ -1072,64 +1090,144 @@ pointSourceRadios.forEach(radio => {
     });
 });
 
+// Перемикач обробки фону
+backgroundProcessingRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+        const selected = document.querySelector('input[name="icon-background-processing"]:checked').value;
+        circleBgColorGroup.style.display = selected === 'circle-bg' ? 'block' : 'none';
+    });
+});
+
+
 // Обробка натискання кнопки "Розмістити на карті"
 document.getElementById('place-point-submit').addEventListener('click', () => {
     const name = document.getElementById('point-name-input').value.trim() || "Без назви";
     const sourceType = document.querySelector('input[name="point-icon-source"]:checked').value;
-
-    let iconPromise;
+    const backgroundProcessingType = document.querySelector('input[name="icon-background-processing"]:checked').value;
+    const circleBgColor = circleBgColorPicker.value;
+    
+    let iconUrlPromise; // Тепер це буде Promise, що повертає URL обробленої іконки
 
     switch (sourceType) {
         case 'url':
             const url = document.getElementById('point-url-input').value.trim();
             if (!url) { alert('Вставте посилання на іконку.'); return; }
-            iconPromise = Promise.resolve(createCustomIcon(url));
+            iconUrlPromise = Promise.resolve(url);
             break;
         case 'file':
             const file = document.getElementById('point-file-input').files[0];
             if (!file) { alert('Оберіть файл іконки.'); return; }
-            iconPromise = new Promise((resolve, reject) => {
+            iconUrlPromise = new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onload = e => resolve(createCustomIcon(e.target.result));
+                reader.onload = e => resolve(e.target.result);
                 reader.onerror = reject;
                 reader.readAsDataURL(file);
             });
             break;
-        default: // 'default'
-            // Створюємо стандартну іконку, як була раніше
+        default: // 'default' - стандартна іконка, без додаткової обробки
             const defaultIcon = L.divIcon({
                 className: 'fa-solid fa-map-pin',
                 iconSize: [24, 24],
                 html: `<i class="fa-solid fa-map-pin" style="font-size: 24px; color: var(--accent-color); text-shadow: 0 0 3px rgba(0,0,0,0.5);"></i>`
             });
-            iconPromise = Promise.resolve(defaultIcon);
+            startMarkerPlacement(name, defaultIcon); // Одразу розміщуємо дефолтний маркер
+            return; // Виходимо, бо далі йде обробка зображень
     }
 
-    iconPromise.then(icon => {
-        startMarkerPlacement(name, icon);
+    iconUrlPromise.then(url => {
+        // Тепер обробляємо зображення, якщо потрібно
+        return processImageForIcon(url, backgroundProcessingType, circleBgColor);
+    }).then(processedDataUrl => {
+        // Створюємо L.Icon з обробленим (або оригінальним) зображенням
+        const finalIcon = L.icon({
+            iconUrl: processedDataUrl,
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+            popupAnchor: [0, -32]
+        });
+        startMarkerPlacement(name, finalIcon);
     }).catch(err => {
-        console.error("Помилка створення іконки:", err);
-        alert("Не вдалося завантажити іконку.");
+        console.error("Помилка створення або обробки іконки:", err);
+        alert("Не вдалося завантажити або обробити іконку. Перевірте консоль для деталей.");
     });
 });
 
-// Функція створення L.icon з гарантованим розміром
-function createCustomIcon(url) {
-    return L.icon({
-        iconUrl: url,
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32]
+// 🖼️ НОВА ФУНКЦІЯ: Обробка зображення за допомогою Canvas
+function processImageForIcon(imageUrl, processingType, bgColor) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous'; // Важливо для зображень з інших доменів
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            const size = 32; // Фіксований розмір іконки
+            canvas.width = size;
+            canvas.height = size;
+
+            // 1. Малюємо фон, якщо обрано 'circle-bg'
+            if (processingType === 'circle-bg') {
+                ctx.beginPath();
+                ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+                ctx.fillStyle = bgColor;
+                ctx.fill();
+                ctx.clip(); // Обрізаємо все, що виходить за межі кола
+            }
+
+            // 2. Малюємо саме зображення, масштабуючи його
+            // Забезпечуємо, щоб зображення повністю вписувалось або заповнювало коло
+            const imgAspectRatio = img.width / img.height;
+            const canvasAspectRatio = size / size; // 1:1
+
+            let sx = 0, sy = 0, sWidth = img.width, sHeight = img.height;
+            let dx = 0, dy = 0, dWidth = size, dHeight = size;
+
+            if (imgAspectRatio > canvasAspectRatio) { // Ширше, ніж високе
+                sHeight = img.width / canvasAspectRatio;
+                sy = (img.height - sHeight) / 2;
+                if (sy < 0) sy = 0; // На випадок, якщо зображення менше за висотою, ніж треба
+            } else { // Вище, ніж широке
+                sWidth = img.height * canvasAspectRatio;
+                sx = (img.width - sWidth) / 2;
+                 if (sx < 0) sx = 0; // На випадок, якщо зображення менше за шириною, ніж треба
+            }
+            // Перемальовуємо, щоб іконка точно вписувалася в 32x32 без спотворень
+            ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+
+
+            // 3. Обробка "Білий в прозорий"
+            if (processingType === 'white-to-transparent') {
+                const imageData = ctx.getImageData(0, 0, size, size);
+                const pixels = imageData.data;
+                for (let i = 0; i < pixels.length; i += 4) {
+                    const r = pixels[i];
+                    const g = pixels[i + 1];
+                    const b = pixels[i + 2];
+                    // Якщо колір дуже близький до білого (можна налаштувати поріг)
+                    if (r > 240 && g > 240 && b > 240) {
+                        pixels[i + 3] = 0; // Зробити альфа-канал 0 (повністю прозорим)
+                    }
+                }
+                ctx.putImageData(imageData, 0, 0);
+            }
+            resolve(canvas.toDataURL());
+        };
+        img.onerror = (e) => {
+            console.error("Помилка завантаження зображення для Canvas:", e);
+            reject(new Error("Не вдалося завантажити зображення."));
+        };
+        img.src = imageUrl;
     });
 }
+
 
 // Функція, що активує режим розміщення на карті
 function startMarkerPlacement(name, icon) {
     customPointModal.classList.remove('visible');
     document.getElementById('map').classList.add('map-placement-mode');
-
+    
     map.once('click', (e) => {
         const latlng = e.latlng;
+        // draggable: true дозволяє перетягувати маркер після його розміщення
         const marker = L.marker(latlng, { icon: icon, draggable: true }).addTo(customPointsLayer);
 
         const timestamp = new Date();
@@ -1141,11 +1239,16 @@ function startMarkerPlacement(name, icon) {
         `;
 
         marker.bindPopup(popupContent).openPopup();
-
+        
         // Очищуємо поля для наступного разу
         document.getElementById('point-name-input').value = '';
         document.getElementById('point-url-input').value = '';
-        document.getElementById('point-file-input').value = null;
+        document.getElementById('point-file-input').value = null; // Скинути файл
+        document.querySelector('input[name="point-icon-source"][value="default"]').checked = true; // Скинути до дефолту
+        document.querySelector('input[name="icon-background-processing"][value="none"]').checked = true; // Скинути обробку фону
+        pointUrlGroup.style.display = 'none'; // Сховати поля URL
+        pointFileGroup.style.display = 'none'; // Сховати поля файлу
+        circleBgColorGroup.style.display = 'none'; // Сховати вибір кольору фону
 
         document.getElementById('map').classList.remove('map-placement-mode');
     });
@@ -1155,6 +1258,7 @@ function startMarkerPlacement(name, icon) {
     </script>
 </body>
 </html>
+
 
 
 
