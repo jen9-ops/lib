@@ -288,6 +288,51 @@
     border-radius: 50%;
     border: 2px solid rgba(0,0,0,0.2);
 }
+
+
+/* --- СТИЛІ ДЛЯ МОДАЛЬНОГО ВІКНА СТВОРЕННЯ ТОЧКИ --- */
+#custom-point-modal-content .form-group {
+    margin-bottom: 15px;
+}
+#custom-point-modal-content label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    font-size: 14px;
+}
+#custom-point-modal-content input[type="text"],
+#custom-point-modal-content input[type="file"] {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+}
+#custom-point-modal-content .source-toggle {
+    display: flex;
+    gap: 20px;
+    justify-content: space-around;
+    background-color: rgba(0,0,0,0.05);
+    padding: 8px;
+    border-radius: 6px;
+}
+#place-point-submit {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    background: var(--accent-color);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background-color 0.2s;
+}
+#place-point-submit:hover {
+    background-color: #0056b3;
+}
+
         
     </style>
 </head>
@@ -387,6 +432,39 @@
 </div>
 </div>
 
+
+<div id="custom-point-modal-overlay" class="event-modal-overlay-custom">
+    <div id="custom-point-modal-content" class="event-modal-content-custom" style="max-width: 450px;">
+        <button id="custom-point-modal-close-button" class="modal-close-custom">&times;</button>
+        <h3>Параметри точки</h3>
+        
+        <div class="form-group">
+            <label for="point-name-input">Назва:</label>
+            <input type="text" id="point-name-input" placeholder="Наприклад, 'Позиція 1'">
+        </div>
+
+        <div class="form-group">
+            <label>Іконка:</label>
+            <div class="source-toggle">
+                <label><input type="radio" name="point-icon-source" value="default" checked> Стандартна</label>
+                <label><input type="radio" name="point-icon-source" value="url"> URL</label>
+                <label><input type="radio" name="point-icon-source" value="file"> Файл</label>
+            </div>
+        </div>
+
+        <div id="point-url-source-group" class="form-group" style="display: none;">
+            <label for="point-url-input">Посилання на іконку:</label>
+            <input type="text" id="point-url-input" placeholder="https://example.com/icon.png">
+        </div>
+
+        <div id="point-file-source-group" class="form-group" style="display: none;">
+            <label for="point-file-input">Завантажити файл (PNG, JPG, SVG):</label>
+            <input type="file" id="point-file-input" accept="image/*">
+        </div>
+
+        <button id="place-point-submit">Розмістити на карті</button>
+    </div>
+</div>
     
     
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -641,7 +719,9 @@ function drawDecoratedPolyline(latlngs, type) {
 
         document.getElementById('upload-button').addEventListener('click', () => logFileInput.click());
         logFileInput.addEventListener('change', handleFileSelect);
-        document.getElementById('add-point-button').addEventListener('click', enterPointPlacementMode);
+        document.getElementById('add-point-button').addEventListener('click', () => {
+    document.getElementById('custom-point-modal-overlay').classList.add('visible');
+});
         
         // --- DeepState Map оверлей ---
         document.getElementById('deepstate-button').addEventListener('click', () => {
@@ -676,32 +756,6 @@ function drawDecoratedPolyline(latlngs, type) {
             });
         }
 
-        // --- Добавление пользовательских точек ---
-        function enterPointPlacementMode() {
-            document.getElementById('map').classList.add('map-placement-mode');
-            map.once('click', (e) => { createCustomPoint(e.latlng); document.getElementById('map').classList.remove('map-placement-mode'); });
-        }
-        function createCustomPoint(latlng, initialName = '') {
-            const marker = L.marker(latlng, { draggable: true, icon: L.divIcon({ className: 'fa-solid fa-map-pin', iconSize: [24, 24], html: `<i class="fa-solid fa-map-pin" style="font-size: 24px; color: var(--accent-color); text-shadow: 0 0 3px rgba(0,0,0,0.5);"></i>` }) }).addTo(customPointsLayer);
-            marker.customName = initialName;
-            marker.bindPopup(getPopupContent(marker)).openPopup();
-        }
-        function getPopupContent(marker) {
-            const markerId = marker._leaflet_id;
-            if (marker.customName) { return `<div class="custom-point-popup"><p>${marker.customName}</p><small>${marker.getLatLng().lat.toFixed(4)}, ${marker.getLatLng().lng.toFixed(4)}</small></div>`; }
-            else { return `<div class="custom-point-popup"><input type="text" id="input-${markerId}" placeholder="Назва точки"><button id="btn-${markerId}">Зберегти</button></div>`; }
-        }
-        map.on('popupopen', function(e) {
-            const marker = e.popup._source; if (!customPointsLayer.hasLayer(marker)) return;
-            const markerId = marker._leaflet_id; const btn = document.getElementById(`btn-${markerId}`);
-            if (btn) {
-                btn.onclick = () => {
-                    const input = document.getElementById(`input-${markerId}`);
-                    marker.customName = input.value || "Без назви";
-                    marker.setPopupContent(getPopupContent(marker));
-                };
-            }
-        });
 
         // --- Работа с Google Sheets ---
         document.getElementById('sync-button').addEventListener('click', () => fetchDataFromSheet(false)); // false = не тихий режим
@@ -994,10 +1048,114 @@ function startDrawing(type) {
         currentModalLog = null;
     });
 }
+
+
+// --- 🖋️ НОВА ЛОГІКА ДЛЯ КНОПКИ "ДОДАТИ ВЛАСНУ ТОЧКУ" ---
+
+const customPointModal = document.getElementById('custom-point-modal-overlay');
+const pointSourceRadios = document.querySelectorAll('input[name="point-icon-source"]');
+const pointUrlGroup = document.getElementById('point-url-source-group');
+const pointFileGroup = document.getElementById('point-file-source-group');
+
+// Закриття модального вікна
+document.getElementById('custom-point-modal-close-button').addEventListener('click', () => customPointModal.classList.remove('visible'));
+customPointModal.addEventListener('click', (e) => {
+    if (e.target === customPointModal) customPointModal.classList.remove('visible');
+});
+
+// Перемикач джерела іконки (Стандартна / URL / Файл)
+pointSourceRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+        const selected = document.querySelector('input[name="point-icon-source"]:checked').value;
+        pointUrlGroup.style.display = selected === 'url' ? 'block' : 'none';
+        pointFileGroup.style.display = selected === 'file' ? 'block' : 'none';
+    });
+});
+
+// Обробка натискання кнопки "Розмістити на карті"
+document.getElementById('place-point-submit').addEventListener('click', () => {
+    const name = document.getElementById('point-name-input').value.trim() || "Без назви";
+    const sourceType = document.querySelector('input[name="point-icon-source"]:checked').value;
+
+    let iconPromise;
+
+    switch (sourceType) {
+        case 'url':
+            const url = document.getElementById('point-url-input').value.trim();
+            if (!url) { alert('Вставте посилання на іконку.'); return; }
+            iconPromise = Promise.resolve(createCustomIcon(url));
+            break;
+        case 'file':
+            const file = document.getElementById('point-file-input').files[0];
+            if (!file) { alert('Оберіть файл іконки.'); return; }
+            iconPromise = new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(createCustomIcon(e.target.result));
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+            break;
+        default: // 'default'
+            // Створюємо стандартну іконку, як була раніше
+            const defaultIcon = L.divIcon({
+                className: 'fa-solid fa-map-pin',
+                iconSize: [24, 24],
+                html: `<i class="fa-solid fa-map-pin" style="font-size: 24px; color: var(--accent-color); text-shadow: 0 0 3px rgba(0,0,0,0.5);"></i>`
+            });
+            iconPromise = Promise.resolve(defaultIcon);
+    }
+
+    iconPromise.then(icon => {
+        startMarkerPlacement(name, icon);
+    }).catch(err => {
+        console.error("Помилка створення іконки:", err);
+        alert("Не вдалося завантажити іконку.");
+    });
+});
+
+// Функція створення L.icon з гарантованим розміром
+function createCustomIcon(url) {
+    return L.icon({
+        iconUrl: url,
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+    });
+}
+
+// Функція, що активує режим розміщення на карті
+function startMarkerPlacement(name, icon) {
+    customPointModal.classList.remove('visible');
+    document.getElementById('map').classList.add('map-placement-mode');
+
+    map.once('click', (e) => {
+        const latlng = e.latlng;
+        const marker = L.marker(latlng, { icon: icon, draggable: true }).addTo(customPointsLayer);
+
+        const timestamp = new Date();
+        const popupContent = `
+            <b>${name}</b><hr style="margin: 5px 0;">
+            <b>Координати:</b><br>${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}<br>
+            <b>Дата:</b> ${timestamp.toLocaleDateString('uk-UA')}<br>
+            <b>Час:</b> ${timestamp.toLocaleTimeString('uk-UA')}
+        `;
+
+        marker.bindPopup(popupContent).openPopup();
+
+        // Очищуємо поля для наступного разу
+        document.getElementById('point-name-input').value = '';
+        document.getElementById('point-url-input').value = '';
+        document.getElementById('point-file-input').value = null;
+
+        document.getElementById('map').classList.remove('map-placement-mode');
+    });
+}
+
         
     </script>
 </body>
 </html>
+
 
 
 
