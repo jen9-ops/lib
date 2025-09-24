@@ -502,6 +502,18 @@ body.dark-theme .vanilla-calendar-day__btn_highlighted {
     background: rgba(0, 122, 255, 0.15); /* Фон чуть менее прозрачный для белого фона */
     color: #007aff; /* Синий цвет текста */
 }
+        /* --- Тёмный текст для заголовков в тёмной теме --- */
+
+/* Главный заголовок "Аналітична панель" */
+body.dark-theme .panel-header h2 {
+    color: #2c2c2c; /* Ваш основной тёмный цвет текста */
+}
+
+/* Заголовки колонок (Календар, Події, Шари карти) */
+body.dark-theme .panel-column h3 {
+    color: #333333; /* Чуть менее тёмный для иерархии */
+    border-bottom-color: rgba(0, 0, 0, 0.2); /* Делаем линию-разделитель тоже темнее */
+}
     </style>
 </head>
 <body>
@@ -1298,6 +1310,7 @@ map.on('baselayerchange', function(e) {
     </script>
 </body>
 </html>
+
 
 
 
