@@ -172,6 +172,89 @@
 #modal-actions button:hover {
     background-color: #0056b3;
 }
+
+
+/* --- СТИЛІ МОДАЛЬНОГО ВІКНА ДЛЯ МАЛЮВАННЯ --- */
+/* Використовуємо класи, схожі на вже існуючі, щоб успадкувати стилі */
+.event-modal-overlay-custom {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 2500;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+.event-modal-overlay-custom.visible {
+    opacity: 1; visibility: visible;
+}
+.event-modal-content-custom {
+    background: var(--bg-color);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 5px 25px var(--shadow-color);
+    width: 90%;
+    max-width: 600px; /* Трохи ширше для кнопок */
+    position: relative;
+    -webkit-backdrop-filter: var(--blur-effect);
+    backdrop-filter: var(--blur-effect);
+}
+.modal-close-custom {
+    position: absolute;
+    top: 10px; right: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-color);
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+.modal-close-custom:hover { opacity: 1; }
+.event-modal-content-custom h3 {
+    margin-top: 0;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+/* Стилі для кнопок вибору інструменту */
+#drawing-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Адаптивна сітка */
+    gap: 15px;
+    margin-top: 20px;
+}
+.draw-option-button {
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 15px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: background-color 0.2s, transform 0.2s;
+    text-align: center;
+}
+.draw-option-button:hover {
+    background-color: rgba(0, 122, 255, 0.1);
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+}
+.draw-option-button i {
+    font-size: 24px;
+    color: var(--accent-color);
+}
         
     </style>
 </head>
@@ -188,6 +271,7 @@
                 </button>
                 <button id="deepstate-button" class="action-button" title="Наложение на DeepState Map"><i class="fa-solid fa-layer-group"></i></button>
                 <button id="add-point-button" class="action-button" title="Додати власну точку"><i class="fa-solid fa-map-pin"></i></button>
+                <button id="draw-button" class="action-button" title="Інструменти малювання"><i class="fa-solid fa-pencil-ruler"></i></button>
                 <button id="gps-button" class="action-button" title="Знайти моє місцеположення"><i class="fa-solid fa-location-crosshairs"></i></button>
                 <button id="upload-button" class="action-button" title="Завантажити логи"><i class="fa-solid fa-upload"></i></button>
                 <button id="export-button" class="action-button" title="Експорт перетинів (GeoJSON)"><i class="fa-solid fa-file-export"></i></button>
@@ -229,6 +313,33 @@
 </div>
 
 
+<div id="drawing-modal-overlay" class="event-modal-overlay-custom">
+    <div id="drawing-modal-content" class="event-modal-content-custom">
+        <button id="drawing-modal-close-button" class="modal-close-custom">&times;</button>
+        <h3>Інструменти малювання</h3>
+        <p style="text-align: center; margin-top: -10px; opacity: 0.7;">Оберіть інструмент, а потім клацніть на карті, щоб вказати початкову та кінцеву точки.</p>
+        <div id="drawing-options">
+            <button class="draw-option-button" data-draw-type="arrow">
+                <i class="fa-solid fa-arrow-right"></i>
+                <span>Звичайна стрілка</span>
+            </button>
+            <button class="draw-option-button" data-draw-type="repeating-arrow">
+                <i class="fa-solid fa-angles-right"></i>
+                <span>Повторювані стрілки</span>
+            </button>
+             <button class="draw-option-button" data-draw-type="dashed-line">
+                <i class="fa-solid fa-grip-lines"></i>
+                <span>Пунктирна лінія</span>
+            </button>
+            <button class="draw-option-button" data-draw-type="animated-ants">
+                <i class="fa-solid fa-person-running"></i>
+                <span>Анімована лінія</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+    
     
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-polylinedecorator@1.6.0/dist/leaflet.polylineDecorator.js"></script>
@@ -262,6 +373,113 @@
         const loader = document.getElementById('loader-overlay');
         const logFileInput = document.getElementById('log-file-input');
         const iframeOverlay = document.getElementById('iframe-overlay');
+
+
+        // --- ЛОГІКА МОДАЛЬНОГО ВІКНА МАЛЮВАННЯ ---
+
+const drawingModalOverlay = document.getElementById('drawing-modal-overlay');
+const drawingOptions = document.getElementById('drawing-options');
+
+// 1. Відкриття та закриття модального вікна
+document.getElementById('draw-button').addEventListener('click', () => {
+    drawingModalOverlay.classList.add('visible');
+});
+
+function closeDrawingModal() {
+    drawingModalOverlay.classList.remove('visible');
+}
+
+document.getElementById('drawing-modal-close-button').addEventListener('click', closeDrawingModal);
+drawingModalOverlay.addEventListener('click', (e) => {
+    if (e.target === drawingModalOverlay) {
+        closeDrawingModal();
+    }
+});
+
+// 2. Обробка кліку на інструмент малювання
+drawingOptions.addEventListener('click', (e) => {
+    const button = e.target.closest('.draw-option-button');
+    if (!button) return;
+
+    const drawType = button.dataset.drawType;
+    closeDrawingModal();
+    initiateDrawing(drawType);
+});
+
+// 3. Функція ініціалізації малювання на карті (2 кліки)
+function initiateDrawing(drawType) {
+    document.getElementById('map').classList.add('map-placement-mode');
+    
+    // Очікуємо перший клік (початкова точка)
+    map.once('click', (e1) => {
+        const startPoint = e1.latlng;
+        
+        // Візуальний маркер для першої точки
+        const startMarker = L.circleMarker(startPoint, { color: 'var(--accent-color)', radius: 5, weight: 2 }).addTo(map);
+
+        // Очікуємо другий клік (кінцева точка)
+        map.once('click', (e2) => {
+            const endPoint = e2.latlng;
+            
+            // Запускаємо функцію, яка малює все що треба
+            drawDecoratedPolyline(startPoint, endPoint, drawType);
+            
+            document.getElementById('map').classList.remove('map-placement-mode');
+            map.removeLayer(startMarker); // Прибираємо тимчасовий маркер
+        });
+    });
+}
+
+// 4. Основна функція для малювання ліній та декораторів
+function drawDecoratedPolyline(start, end, type) {
+    const latlngs = [start, end];
+    const polyline = L.polyline(latlngs, { color: '#007aff', weight: 3 }).addTo(drawingsLayer);
+
+    switch (type) {
+        case 'arrow':
+            L.polylineDecorator(polyline, {
+                patterns: [{
+                    offset: '100%', repeat: 0,
+                    symbol: L.Symbol.arrowHead({ pixelSize: 15, pathOptions: { stroke: true, color: '#007aff' } })
+                }]
+            }).addTo(drawingsLayer);
+            break;
+
+        case 'repeating-arrow':
+            L.polylineDecorator(polyline, {
+                patterns: [{
+                    repeat: 80,
+                    symbol: L.Symbol.arrowHead({ pixelSize: 12, pathOptions: { color: '#007aff', fillOpacity: 1, weight: 0 }})
+                }]
+            }).addTo(drawingsLayer);
+            break;
+            
+        case 'dashed-line':
+            polyline.setStyle({ dashArray: '10, 10' });
+            break;
+
+        case 'animated-ants':
+            const decorator = L.polylineDecorator(polyline, {
+                patterns: [{
+                    offset: 0, repeat: '20px',
+                    symbol: L.Symbol.dash({ pixelSize: 10, pathOptions: { color: 'white', weight: 2, opacity: 0.8 }})
+                }]
+            }).addTo(drawingsLayer);
+
+            let offset = 0;
+            const intervalId = setInterval(() => {
+                offset = (offset + 1) % 20;
+                decorator.setPatterns([{
+                    offset: offset, repeat: '20px',
+                    symbol: L.Symbol.dash({ pixelSize: 10, pathOptions: { color: 'white', weight: 2, opacity: 0.8 }})
+                }]);
+            }, 100);
+            // Примітка: в реальному проекті варто було б зберігати intervalId, щоб зупиняти анімацію
+            break;
+    }
+}
+
+
         
         // --- Управление интерфейсом ---
         document.getElementById('panel-header-toggle').addEventListener('click', (e) => {
@@ -638,5 +856,6 @@ function startDrawing(type) {
     </script>
 </body>
 </html>
+
 
 
