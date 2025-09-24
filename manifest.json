@@ -1,7 +1,7 @@
 {
   "name": "Карта - Аналітична панель",
   "short_name": "Карта",
-  "description": "Аналітична панель з картою для обробки тактичних логів.",
+  "description": "Аналітична панель.",
   "start_url": ".",
   "display": "fullscreen",
   "background_color": "#eef1f4",
@@ -18,4 +18,8 @@
       "type": "image/png"
     }
   ]
+
 }
+
+
+
