@@ -665,16 +665,11 @@ body.dark-theme .panel-column h3 {
         const baseLayers = {
             "Стандартна": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OSM' }),
             "Супутник": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '&copy; Esri' }),
-              "Супутник Google": L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
-        maxZoom: 20,
-        subdomains:['mt0','mt1','mt2','mt3'],
-        attribution: '&copy; Google'
-        });
-          // ДОДАНО: Гібридна карта від Google (супутник + назви)
+     
   
    
-        baseLayers["Супутник Google"].addTo(map);
-       // baseLayers["Стандартна"].addTo(map);
+   
+        baseLayers["Стандартна"].addTo(map);
 
         
 
@@ -1379,6 +1374,7 @@ map.on('baselayerchange', function(e) {
     </script>
 </body>
 </html>
+
 
 
 
